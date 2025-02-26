@@ -17,6 +17,9 @@
     --danger-color: #dc3545;
     --transition-speed: 0.3s;
     --header-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --mobile-input-height: 100px;
+    --mobile-padding: 10px;
+    --mobile-border-radius: 8px;
 }
 
 .dark-mode {
@@ -921,9 +924,10 @@ footer {
     }
 
     /* 触摸反馈效果 */
-    .tab-btn:active, button:active, .icon-btn:active, .key-btn:active {
+    .tab-btn:active, button:active, .icon-btn:active, .key-btn:active, .copy-btn:active {
         transform: scale(0.95);
         transition: transform 0.1s;
+        opacity: 0.9;
     }
 
     /* 提高点击区域 */
@@ -954,14 +958,101 @@ footer {
         transform: translateZ(0);
     }
 
+    /* 优化复制按钮 */
     .copy-btn {
         padding: 6px 10px;
         font-size: 0.85rem;
+        /* 增加点击区域 */
+        min-height: 38px;
+        min-width: 50px;
+        /* 增强触摸反馈 */
+        transition: all 0.2s ease;
+        /* 提高视觉层次感 */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     
     .copy-btn i {
         margin-right: 4px;
         font-size: 0.9rem;
+    }
+    
+    /* 添加点击波纹效果 */
+    @keyframes ripple {
+        0% { transform: scale(0.8); opacity: 1; }
+        100% { transform: scale(1.5); opacity: 0; }
+    }
+    
+    .copy-btn:active::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 30px;
+        height: 30px;
+        background: rgba(102, 88, 211, 0.3);
+        border-radius: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        animation: ripple 0.6s ease-out;
+    }
+
+    /* 添加性能优化 */
+    .container, .output, .button, .tabs, header, footer {
+        will-change: transform;
+    }
+    
+    /* 优化输入区域 */
+    textarea {
+        border-radius: var(--mobile-border-radius);
+        padding: var(--mobile-padding);
+        height: var(--mobile-input-height);
+        line-height: 1.4;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
+    
+    /* 改进输出区域显示 */
+    .output {
+        border-radius: var(--mobile-border-radius);
+        padding: var(--mobile-padding);
+        line-height: 1.4;
+        word-break: break-word;
+        hyphens: auto;
+    }
+    
+    /* 改进暴力破解结果区域 */
+    .bruteforce-results {
+        padding: 15px 10px;
+        border-radius: var(--mobile-border-radius);
+    }
+    
+    .result-item {
+        padding: 10px;
+        margin-bottom: 8px;
+        border-radius: var(--mobile-border-radius);
+    }
+    
+    /* 栅栏可视化优化 */
+    .rail-container {
+        padding: 10px;
+        border-radius: var(--mobile-border-radius);
+    }
+    
+    /* 确保表单输入整齐对齐 */
+    .input-with-buttons {
+        display: flex;
+        align-items: stretch;
+        height: 40px;
+    }
+    
+    input[type="number"] {
+        height: 100%;
+    }
+    
+    .key-btn {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 }
 
@@ -1008,76 +1099,154 @@ footer {
 
     .container {
         border-radius: 6px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    header {
+        padding: 15px 10px;
     }
 
     header h1 {
-        font-size: 1.6rem;
+        font-size: 1.5rem;
+        margin-bottom: 5px;
     }
 
     header p {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
+    }
+
+    .tab-content {
+        padding: 15px 10px;
     }
 
     .tab-btn {
         padding: 10px 5px;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
     }
 
     h2 {
-        font-size: 1.4rem;
-        margin-bottom: 15px;
+        font-size: 1.3rem;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
     }
 
     h3 {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
     }
 
     label {
         font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+
+    .textarea-container textarea {
+        padding: 10px;
+        min-height: 100px;
+        font-size: 0.95rem;
     }
 
     .character-count {
         font-size: 0.8rem;
+        margin-top: 2px;
     }
 
     .output {
         font-size: 0.9rem;
-        padding: 12px;
+        padding: 10px;
+        min-height: 80px;
+        margin-bottom: 15px;
     }
 
     .notification {
         width: 90%;
         left: 5%;
-        padding: 10px;
+        right: auto;
+        padding: 8px 10px;
+        font-size: 0.9rem;
     }
 
     /* 优化按钮的触摸区域 */
     .icon-btn {
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
     }
 
     /* 扩大表单元素的触摸区域 */
     .key-btn {
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
     }
 
     /* 优化历史记录显示 */
     .history-text {
         max-width: 100%;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
     }
 
     .rail-cell {
-        width: 20px;
-        height: 20px;
+        width: 22px;
+        height: 22px;
         font-size: 0.7rem;
     }
 
     .copy-btn {
         padding: 5px 8px;
         font-size: 0.8rem;
+    }
+    
+    /* 改进输入表单和按钮的间距 */
+    .form-group {
+        margin-bottom: 12px;
+    }
+    
+    /* 主要操作按钮优化 */
+    button[id$="encrypt"],
+    button[id$="decrypt"],
+    button[id="caesar-bruteforce"] {
+        padding: 12px 0;
+        font-size: 0.9rem;
+    }
+
+    /* 增加操作按钮的间距 */
+    .actions {
+        gap: 8px;
+    }
+    
+    /* 输出区域的间距优化 */
+    .output-section {
+        padding: 15px 10px;
+    }
+}
+
+/* 进一步针对极小屏幕的优化 */
+@media (max-width: 360px) {
+    header h1 {
+        font-size: 1.4rem;
+    }
+    
+    .tab-btn {
+        padding: 8px 3px;
+        font-size: 0.8rem;
+    }
+    
+    .tab-btn i {
+        margin-right: 3px;
+    }
+    
+    .copy-btn {
+        padding: 4px 6px;
+        font-size: 0.75rem;
+    }
+    
+    .copy-btn i {
+        font-size: 0.8rem;
+    }
+    
+    button[id$="encrypt"],
+    button[id$="decrypt"],
+    button[id="caesar-bruteforce"] {
+        font-size: 0.85rem;
+        padding: 10px 0;
     }
 }
 

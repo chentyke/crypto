@@ -1,4 +1,12 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // 确保页面加载时不显示通知
+    const notification = document.getElementById('copy-notification');
+    if (notification) {
+        notification.classList.remove('show');
+        // 添加一个隐藏样式，确保一开始完全不可见
+        notification.style.transform = 'translateX(200%)';
+    }
+    
     // 语言切换功能
     const langToggle = document.getElementById('lang-toggle');
     const langSwitchWrapper = document.querySelector('.lang-switch-wrapper');
