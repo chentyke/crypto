@@ -1,33 +1,34 @@
-# 古典密码工具
+# Classical Cipher Tool
 
-一个美观的网页应用，用于实现凯撒密码和栅栏密码的加密、解密和破解功能。
+An elegant web application for implementing Caesar cipher and Rail Fence cipher encryption, decryption, and cracking functions.
 
-## 功能特点
+## Features
 
-### 凯撒密码
-- **加密**：使用指定的位移量（1-25）对文本进行加密
-- **解密**：使用指定的位移量对已加密文本进行解密
-- **暴力破解**：一次性显示所有25种可能的解密结果
+### Caesar Cipher
+- **Encryption**: Encrypt text using a specified shift value (1-25)
+- **Decryption**: Decrypt encrypted text using a specified shift value
+- **Brute Force**: Display all 25 possible decryption results at once
 
-### 栅栏密码
-- **加密**：使用指定的栏数（2-10）对文本进行栅栏加密
-- **解密**：使用指定的栏数对已加密文本进行栅栏解密
-- **可视化**：直观显示栅栏密码的加密/解密过程
+### Rail Fence Cipher
+- **Encryption**: Encrypt text using a specified number of rails (2-10)
+- **Decryption**: Decrypt encrypted text using a specified number of rails
+- **Visualization**: Intuitively display the encryption/decryption process of the Rail Fence cipher
 
-## 使用说明
+## Usage Instructions
 
-1. 在浏览器中打开 `index.html` 文件
-2. 选择所需的加密类型（凯撒密码或栅栏密码）
-3. 输入要处理的文本
-4. 设置参数（位移量或栏数）
-5. 点击相应的按钮进行加密、解密或暴力破解
+1. Open the `index.html` file in a browser
+2. Select the desired encryption type (Caesar cipher or Rail Fence cipher)
+3. Enter the text to be processed
+4. Set parameters (shift value or number of rails)
+5. Click the corresponding button for encryption, decryption, or brute force cracking
 
-## 技术实现
+## Technical Implementation
 
-- 使用纯原生HTML、CSS和JavaScript实现
-- 响应式设计，适配不同屏幕尺寸
-- 现代UI设计，清晰直观的用户界面
+- Implemented using pure HTML, CSS, and JavaScript
+- Responsive design, adapting to different screen sizes
+- Modern UI design with a clear and intuitive user interface
+- Supports English and Chinese language switching
 
-## 本地运行
+## Local Execution
 
-只需用浏览器打开 `index.html` 文件即可，无需安装任何依赖或设置本地服务器。 
+Simply open the `index.html` file with a browser. No need to install any dependencies or set up a local server. 

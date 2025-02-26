@@ -94,59 +94,49 @@ header p {
     align-items: center;
 }
 
-.theme-switch {
-    display: inline-block;
-    height: 24px;
-    position: relative;
-    width: 48px;
-    margin-right: 10px;
+/* 语言切换 */
+.lang-switch-wrapper {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
 }
 
-.theme-switch input {
+.lang-switch {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+}
+
+.lang-switch input {
     display: none;
 }
 
-.slider {
-    background-color: rgba(255, 255, 255, 0.3);
-    bottom: 0;
-    cursor: pointer;
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-    transition: .4s;
-}
-
-.slider:before {
-    background-color: white;
-    bottom: 4px;
-    content: "";
-    height: 16px;
-    left: 4px;
-    position: absolute;
-    transition: .4s;
-    width: 16px;
-}
-
-input:checked + .slider {
-    background-color: var(--accent-color);
-}
-
-input:checked + .slider:before {
-    transform: translateX(24px);
-}
-
-.slider.round {
-    border-radius: 24px;
-}
-
-.slider.round:before {
-    border-radius: 50%;
-}
-
-.theme-label {
+.lang-switch .lang-text {
     color: white;
     font-size: 0.9rem;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.lang-switch .lang-text:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Add a subtle pulse animation when changing language */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.lang-switch-wrapper.pulse {
+    animation: pulse 0.5s ease;
 }
 
 /* 标签页样式 */
@@ -754,6 +744,13 @@ footer {
         position: static;
         justify-content: center;
         margin-top: 15px;
+    }
+    
+    .lang-switch-wrapper {
+        position: static;
+        justify-content: center;
+        margin: 15px auto 10px;
+        width: fit-content;
     }
     
     .tab-btn {

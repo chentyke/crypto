@@ -1,4 +1,165 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // 语言切换功能
+    const langToggle = document.getElementById('lang-toggle');
+    const langSwitchWrapper = document.querySelector('.lang-switch-wrapper');
+    const translations = {
+        'en': {
+            'title': 'Classical Cipher Tools',
+            'subtitle': 'Implement encryption and decryption of Caesar cipher and Rail Fence cipher',
+            'caesar': 'Caesar Cipher',
+            'railfence': 'Rail Fence Cipher',
+            'input_text': 'Input Text:',
+            'characters': 'characters',
+            'shift': 'Shift (1-25):',
+            'rails': 'Rails (2-10):',
+            'encrypt': 'Encrypt',
+            'decrypt': 'Decrypt',
+            'bruteforce': 'Brute Force',
+            'result': 'Result:',
+            'bruteforce_results': 'Brute Force Results:',
+            'rail_visualization': 'Rail Fence Visualization:',
+            'history': 'History',
+            'footer_text': 'Caesar Cipher & Rail Fence Cipher',
+            'copied': 'Copied to clipboard',
+            'empty_history': 'No history records',
+            'key_label': 'Key',
+            'apply': 'Apply',
+            'delete': 'Delete',
+            'clear_text': 'Clear text',
+            'generate_random': 'Generate random text',
+            'copy_result': 'Copy result',
+            'enter_encrypt_text': 'Please enter text to encrypt',
+            'enter_decrypt_text': 'Please enter text to decrypt',
+            'enter_bruteforce_text': 'Please enter text to brute force',
+            'shift_range_error': 'Shift must be an integer between 1 and 25',
+            'rails_range_error': 'Rails must be an integer between 2 and 10'
+        },
+        'zh': {
+            'title': '古典密码工具',
+            'subtitle': '实现凯撒密码和栅栏密码的加解密',
+            'caesar': '凯撒密码',
+            'railfence': '栅栏密码',
+            'input_text': '输入文本：',
+            'characters': '个字符',
+            'shift': '位移量 (1-25)：',
+            'rails': '栏数 (2-10)：',
+            'encrypt': '加密',
+            'decrypt': '解密',
+            'bruteforce': '暴力破解',
+            'result': '结果：',
+            'bruteforce_results': '暴力破解结果：',
+            'rail_visualization': '栅栏可视化：',
+            'history': '历史记录',
+            'footer_text': '凯撒密码 & 栅栏密码',
+            'copied': '已复制到剪贴板',
+            'empty_history': '暂无历史记录',
+            'key_label': '密钥',
+            'apply': '应用',
+            'delete': '删除',
+            'clear_text': '清空文本',
+            'generate_random': '生成随机文本',
+            'copy_result': '复制结果',
+            'enter_encrypt_text': '请输入要加密的文本',
+            'enter_decrypt_text': '请输入要解密的文本',
+            'enter_bruteforce_text': '请输入要破解的文本',
+            'shift_range_error': '位移量必须是1到25之间的整数',
+            'rails_range_error': '栏数必须是2到10之间的整数'
+        }
+    };
+    
+    // 设置语言
+    function setLanguage(lang) {
+        document.documentElement.lang = lang;
+        document.querySelectorAll('[data-lang]').forEach(element => {
+            const key = element.getAttribute('data-lang');
+            if (translations[lang][key]) {
+                element.textContent = translations[lang][key];
+            }
+        });
+        
+        // 更新按钮的title属性
+        document.querySelector('.clear-btn').title = translations[lang]['clear_text'];
+        document.querySelector('.random-btn').title = translations[lang]['generate_random'];
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.title = translations[lang]['copy_result'];
+        });
+        
+        // 更新textarea的placeholder
+        document.querySelectorAll('textarea').forEach(textarea => {
+            textarea.placeholder = lang === 'en' ? 
+                "Please enter text to process..." : 
+                "请输入要处理的文本...";
+        });
+        
+        // 更新历史记录中的文本
+        updateHistoryTexts(lang);
+        
+        // 保存语言设置到本地存储
+        localStorage.setItem('preferred-language', lang);
+        
+        // 添加脉冲动画效果
+        langSwitchWrapper.classList.add('pulse');
+        setTimeout(() => {
+            langSwitchWrapper.classList.remove('pulse');
+        }, 500);
+    }
+    
+    // 更新历史记录中的文本
+    function updateHistoryTexts(lang) {
+        const historyItems = document.querySelectorAll('.history-item');
+        if (historyItems.length === 0) return;
+        
+        historyItems.forEach(item => {
+            const typeElement = item.querySelector('.history-type');
+            if (typeElement) {
+                const isCaesar = typeElement.innerHTML.includes('fa-key');
+                const isEncrypt = typeElement.innerHTML.includes('加密') || typeElement.innerHTML.includes('Encrypt');
+                const isDecrypt = typeElement.innerHTML.includes('解密') || typeElement.innerHTML.includes('Decrypt');
+                const isBruteforce = typeElement.innerHTML.includes('暴力破解') || typeElement.innerHTML.includes('Brute Force');
+                
+                let newText = '';
+                if (isCaesar) {
+                    newText += `<i class="fas fa-key"></i> ${translations[lang]['caesar']} `;
+                } else {
+                    newText += `<i class="fas fa-bars"></i> ${translations[lang]['railfence']} `;
+                }
+                
+                if (isEncrypt) {
+                    newText += translations[lang]['encrypt'];
+                } else if (isDecrypt) {
+                    newText += translations[lang]['decrypt'];
+                } else if (isBruteforce) {
+                    newText += translations[lang]['bruteforce'];
+                }
+                
+                typeElement.innerHTML = newText;
+            }
+            
+            const applyBtn = item.querySelector('.history-apply');
+            const deleteBtn = item.querySelector('.history-delete');
+            
+            if (applyBtn) applyBtn.title = translations[lang]['apply'];
+            if (deleteBtn) deleteBtn.title = translations[lang]['delete'];
+        });
+        
+        // 更新空历史记录提示
+        const emptyHistory = document.querySelector('.history-empty');
+        if (emptyHistory) {
+            emptyHistory.textContent = translations[lang]['empty_history'];
+        }
+    }
+    
+    // 语言切换事件
+    langToggle.addEventListener('change', function() {
+        const lang = this.checked ? 'zh' : 'en';
+        setLanguage(lang);
+    });
+    
+    // 初始化语言设置
+    const savedLang = localStorage.getItem('preferred-language') || 'en';
+    langToggle.checked = savedLang === 'zh';
+    setLanguage(savedLang);
+    
     // 选项卡切换功能
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabPanes = document.querySelectorAll('.tab-pane');
@@ -160,7 +321,7 @@ document.addEventListener('DOMContentLoaded', function() {
         historyContainer.innerHTML = '';
         
         if (history.length === 0) {
-            historyContainer.innerHTML = '<div class="history-empty">暂无历史记录</div>';
+            historyContainer.innerHTML = `<div class="history-empty">${translations[document.documentElement.lang]['empty_history']}</div>`;
             return;
         }
         
@@ -169,18 +330,29 @@ document.addEventListener('DOMContentLoaded', function() {
             const historyItem = document.createElement('div');
             historyItem.className = 'history-item';
             
+            const lang = document.documentElement.lang;
+            const typeText = item.type === 'caesar' ? translations[lang]['caesar'] : translations[lang]['railfence'];
+            let operationText = '';
+            
+            if (item.operation === 'encrypt') {
+                operationText = translations[lang]['encrypt'];
+            } else if (item.operation === 'decrypt') {
+                operationText = translations[lang]['decrypt'];
+            } else {
+                operationText = translations[lang]['bruteforce'];
+            }
+            
             historyItem.innerHTML = `
                 <div class="history-info">
                     <div class="history-type">
                         <i class="fas ${item.type === 'caesar' ? 'fa-key' : 'fa-bars'}"></i>
-                        ${item.type === 'caesar' ? '凯撒密码' : '栅栏密码'} 
-                        ${item.operation === 'encrypt' ? '加密' : item.operation === 'decrypt' ? '解密' : '暴力破解'}
+                        ${typeText} ${operationText}
                     </div>
                     <div class="history-text">${item.input}</div>
                 </div>
                 <div class="history-actions">
-                    <button class="history-btn history-apply" data-index="${index}" title="应用"><i class="fas fa-reply"></i></button>
-                    <button class="history-btn history-delete" data-index="${index}" title="删除"><i class="fas fa-trash"></i></button>
+                    <button class="history-btn history-apply" data-index="${index}" title="${translations[lang]['apply']}"><i class="fas fa-reply"></i></button>
+                    <button class="history-btn history-delete" data-index="${index}" title="${translations[lang]['delete']}"><i class="fas fa-trash"></i></button>
                 </div>
             `;
             
@@ -271,13 +443,13 @@ document.addEventListener('DOMContentLoaded', function() {
     caesarEncryptBtn.addEventListener('click', () => {
         const text = caesarInput.value.trim();
         if (!text) {
-            alert('请输入要加密的文本');
+            alert(translations[document.documentElement.lang]['enter_encrypt_text']);
             return;
         }
         
         const key = parseInt(caesarKey.value);
         if (isNaN(key) || key < 1 || key > 25) {
-            alert('位移量必须是1到25之间的整数');
+            alert(translations[document.documentElement.lang]['shift_range_error']);
             return;
         }
         
@@ -299,13 +471,13 @@ document.addEventListener('DOMContentLoaded', function() {
     caesarDecryptBtn.addEventListener('click', () => {
         const text = caesarInput.value.trim();
         if (!text) {
-            alert('请输入要解密的文本');
+            alert(translations[document.documentElement.lang]['enter_decrypt_text']);
             return;
         }
         
         const key = parseInt(caesarKey.value);
         if (isNaN(key) || key < 1 || key > 25) {
-            alert('位移量必须是1到25之间的整数');
+            alert(translations[document.documentElement.lang]['shift_range_error']);
             return;
         }
         
@@ -328,7 +500,7 @@ document.addEventListener('DOMContentLoaded', function() {
     caesarBruteforceBtn.addEventListener('click', () => {
         const text = caesarInput.value.trim();
         if (!text) {
-            alert('请输入要破解的文本');
+            alert(translations[document.documentElement.lang]['enter_bruteforce_text']);
             return;
         }
         
@@ -352,7 +524,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             resultItem.innerHTML = `
-                <div class="key-label">密钥 ${key}:</div>
+                <div class="key-label">${translations[document.documentElement.lang]['key_label']} ${key}:</div>
                 <div>${decrypted}</div>
             `;
             
@@ -406,13 +578,13 @@ document.addEventListener('DOMContentLoaded', function() {
     railfenceEncryptBtn.addEventListener('click', () => {
         const text = railfenceInput.value.trim();
         if (!text) {
-            alert('请输入要加密的文本');
+            alert(translations[document.documentElement.lang]['enter_encrypt_text']);
             return;
         }
         
         const key = parseInt(railfenceKey.value);
         if (isNaN(key) || key < 2 || key > 10) {
-            alert('栏数必须是2到10之间的整数');
+            alert(translations[document.documentElement.lang]['rails_range_error']);
             return;
         }
         
@@ -435,13 +607,13 @@ document.addEventListener('DOMContentLoaded', function() {
     railfenceDecryptBtn.addEventListener('click', () => {
         const text = railfenceInput.value.trim();
         if (!text) {
-            alert('请输入要解密的文本');
+            alert(translations[document.documentElement.lang]['enter_decrypt_text']);
             return;
         }
         
         const key = parseInt(railfenceKey.value);
         if (isNaN(key) || key < 2 || key > 10) {
-            alert('栏数必须是2到10之间的整数');
+            alert(translations[document.documentElement.lang]['rails_range_error']);
             return;
         }
         
