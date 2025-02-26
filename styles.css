@@ -953,6 +953,16 @@ footer {
         -webkit-transform: translateZ(0);
         transform: translateZ(0);
     }
+
+    .copy-btn {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+    
+    .copy-btn i {
+        margin-right: 4px;
+        font-size: 0.9rem;
+    }
 }
 
 /* 添加反转按钮样式 */
@@ -1063,6 +1073,11 @@ footer {
         width: 20px;
         height: 20px;
         font-size: 0.7rem;
+    }
+
+    .copy-btn {
+        padding: 5px 8px;
+        font-size: 0.8rem;
     }
 }
 

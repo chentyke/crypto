@@ -322,11 +322,22 @@ document.addEventListener('DOMContentLoaded', function() {
     // 显示通知
     function showNotification() {
         const notification = document.getElementById('copy-notification');
-        notification.classList.add('show');
         
+        // 确保通知元素存在
+        if (!notification) return;
+        
+        // 先移除可能存在的show类，以防止刷新页面时通知仍然显示
+        notification.classList.remove('show');
+        
+        // 延迟一下再添加show类，确保DOM完全加载并且之前的动画已经结束
         setTimeout(() => {
-            notification.classList.remove('show');
-        }, 2000);
+            notification.classList.add('show');
+            
+            // 设置一个定时器在2秒后隐藏通知
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }, 10);
     }
     
     // 字符计数功能
