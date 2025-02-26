@@ -629,15 +629,18 @@ button:active {
     border-radius: 6px;
     padding: 15px;
     overflow-x: auto;
+    max-width: 100%;
     transition: background-color 0.5s ease, border 0.5s ease;
 }
 
 .rail {
     display: flex;
     gap: 5px;
+    flex-wrap: nowrap;
 }
 
 .rail-cell {
+    min-width: 30px;
     width: 30px;
     height: 30px;
     display: flex;
@@ -649,6 +652,21 @@ button:active {
     transition: all 0.3s ease;
     background-color: var(--bg-white);
     color: var(--text-color);
+}
+
+/* Rail Fence adaptive sizing based on input length */
+.rail-container.long-text .rail-cell {
+    min-width: 24px;
+    width: 24px;
+    height: 24px;
+    font-size: 0.8rem;
+}
+
+.rail-container.very-long-text .rail-cell {
+    min-width: 18px;
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
 }
 
 .rail-cell.filled {
@@ -901,9 +919,24 @@ footer {
     }
     
     .rail-cell {
+        min-width: 25px;
         width: 25px;
         height: 25px;
         font-size: 0.8rem;
+    }
+
+    .rail-container.long-text .rail-cell {
+        min-width: 20px;
+        width: 20px;
+        height: 20px;
+        font-size: 0.75rem;
+    }
+    
+    .rail-container.very-long-text .rail-cell {
+        min-width: 16px;
+        width: 16px;
+        height: 16px;
+        font-size: 0.65rem;
     }
 
     .history-item {
@@ -1214,9 +1247,24 @@ footer {
     }
 
     .rail-cell {
+        min-width: 22px;
         width: 22px;
         height: 22px;
         font-size: 0.7rem;
+    }
+
+    .rail-container.long-text .rail-cell {
+        min-width: 18px;
+        width: 18px;
+        height: 18px;
+        font-size: 0.65rem;
+    }
+    
+    .rail-container.very-long-text .rail-cell {
+        min-width: 14px;
+        width: 14px;
+        height: 14px;
+        font-size: 0.6rem;
     }
 
     .copy-btn {

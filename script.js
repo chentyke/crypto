@@ -957,6 +957,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function visualizeRailFence(matrix, container) {
         container.innerHTML = '';
         
+        // 根据文本长度添加类来自适应单元格大小
+        container.classList.remove('long-text', 'very-long-text');
+        const textLength = matrix[0].length;
+        if (textLength > 50) {
+            container.classList.add('very-long-text');
+        } else if (textLength > 30) {
+            container.classList.add('long-text');
+        }
+        
         for (let i = 0; i < matrix.length; i++) {
             const rail = document.createElement('div');
             rail.className = 'rail';
