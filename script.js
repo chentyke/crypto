@@ -1,28 +1,21 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // 主题切换功能
-    const themeToggle = document.getElementById('checkbox');
-    const currentTheme = localStorage.getItem('theme');
-    
-    // 检查之前保存的主题
-    if (currentTheme) {
-        document.body.classList.add(currentTheme);
-        
-        // 如果之前的主题是深色模式，选中复选框
-        if (currentTheme === 'dark-mode') {
-            themeToggle.checked = true;
+    // 自动检测系统颜色模式
+    function detectColorScheme() {
+        // 检查浏览器是否支持prefers-color-scheme
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
         }
     }
     
-    // 主题切换事件
-    themeToggle.addEventListener('change', function() {
-        if (this.checked) {
-            document.body.classList.add('dark-mode');
-            localStorage.setItem('theme', 'dark-mode');
-        } else {
-            document.body.classList.remove('dark-mode');
-            localStorage.setItem('theme', '');
-        }
-    });
+    // 初始检测
+    detectColorScheme();
+    
+    // 监听系统颜色模式变化
+    if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', detectColorScheme);
+    }
     
     // 选项卡切换功能
     const tabButtons = document.querySelectorAll('.tab-btn');
