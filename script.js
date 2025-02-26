@@ -1,22 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // 自动检测系统颜色模式
-    function detectColorScheme() {
-        // 检查浏览器是否支持prefers-color-scheme
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.body.classList.add('dark-mode');
-        } else {
-            document.body.classList.remove('dark-mode');
-        }
-    }
-    
-    // 初始检测
-    detectColorScheme();
-    
-    // 监听系统颜色模式变化
-    if (window.matchMedia) {
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', detectColorScheme);
-    }
-    
     // 选项卡切换功能
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabPanes = document.querySelectorAll('.tab-pane');
