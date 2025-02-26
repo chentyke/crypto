@@ -463,6 +463,11 @@ button:active {
     justify-content: center;
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    position: relative;
+}
+
+.copy-btn span {
+    display: inline-block;
 }
 
 .copy-btn i {
@@ -965,20 +970,40 @@ footer {
     }
     
     .copy-btn {
-        padding: 5px 8px;
-        font-size: 0.85rem;
-        /* 减小尺寸 */
-        min-height: 32px;
-        min-width: 42px;
-        /* 右边距 */
+        /* 圆角正方形按钮 */
+        width: 36px;
+        height: 36px;
+        min-width: initial;
+        min-height: initial;
+        padding: 0;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         margin-left: auto;
         transition: all 0.2s ease;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+    }
+    
+    /* 悬停效果 */
+    .copy-btn:hover {
+        transform: translateY(-2px);
+        background-color: var(--primary-color);
+        color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
     
     .copy-btn i {
-        margin-right: 3px;
-        font-size: 0.85rem;
+        margin-right: 0;
+        font-size: 1rem;
+    }
+    
+    /* 隐藏复制按钮中的文字 */
+    .copy-btn span {
+        display: none;
     }
     
     /* 添加点击波纹效果 */
@@ -1195,15 +1220,13 @@ footer {
     }
 
     .copy-btn {
-        padding: 4px 6px;
-        font-size: 0.75rem;
-        min-height: 28px;
-        min-width: 36px;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
     }
     
     .copy-btn i {
-        font-size: 0.75rem;
-        margin-right: 2px;
+        font-size: 0.9rem;
     }
     
     /* 改进输入表单和按钮的间距 */
@@ -1246,12 +1269,12 @@ footer {
     }
     
     .copy-btn {
-        padding: 4px 6px;
-        font-size: 0.75rem;
+        width: 30px;
+        height: 30px;
     }
     
     .copy-btn i {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
     }
     
     button[id$="encrypt"],
