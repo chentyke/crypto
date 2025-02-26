@@ -80,10 +80,10 @@ document.addEventListener('DOMContentLoaded', function() {
             'subtitle': 'Implement encryption and decryption of Caesar cipher and Rail Fence cipher',
             'caesar': 'Caesar Cipher',
             'railfence': 'Rail Fence Cipher',
-            'input_text': 'Input Text:',
+            'input_text': 'Input Text',
             'characters': 'characters',
-            'shift': 'Shift (1-25):',
-            'rails': 'Rails (2-10):',
+            'shift': 'Shift (1-25)',
+            'rails': 'Rails (2-10)',
             'encrypt': 'Encrypt',
             'decrypt': 'Decrypt',
             'bruteforce': 'Brute Force',
@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'history': 'History',
             'footer_text': 'Caesar Cipher & Rail Fence Cipher',
             'copied': 'Copied to clipboard',
+            'click_to_close': 'Click × or outside to close',
             'empty_history': 'No history records',
             'key_label': 'Key',
             'apply': 'Apply',
@@ -138,10 +139,10 @@ document.addEventListener('DOMContentLoaded', function() {
             'subtitle': '实现凯撒密码和栅栏密码的加解密',
             'caesar': '凯撒密码',
             'railfence': '栅栏密码',
-            'input_text': '输入文本：',
+            'input_text': '输入文本',
             'characters': '个字符',
-            'shift': '位移量 (1-25)：',
-            'rails': '栏数 (2-10)：',
+            'shift': '位移量 (1-25)',
+            'rails': '栏数 (2-10)',
             'encrypt': '加密',
             'decrypt': '解密',
             'bruteforce': '暴力破解',
@@ -151,6 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'history': '历史记录',
             'footer_text': '凯撒密码 & 栅栏密码',
             'copied': '已复制到剪贴板',
+            'click_to_close': '点击×或外部区域关闭',
             'empty_history': '暂无历史记录',
             'key_label': '密钥',
             'apply': '应用',
@@ -234,11 +236,12 @@ document.addEventListener('DOMContentLoaded', function() {
         'also': 0.0013, 'did': 0.0013, 'its': 0.0013, 'between': 0.0012, 'before': 0.0012
     };
     
-    // 添加英语单词长度分布数据 (基于Google Books数据)
+    // 添加英语单词长度分布数据 (基于用户提供的更新数据)
     const englishWordLengthFreq = {
         1: 0.0299, 2: 0.1765, 3: 0.2051, 4: 0.1479, 5: 0.1070,
         6: 0.0839, 7: 0.0794, 8: 0.0594, 9: 0.0444, 10: 0.0308,
-        11: 0.0176, 12: 0.0096, 13: 0.0052, 14: 0.0022, 15: 0.0008
+        11: 0.0176, 12: 0.0096, 13: 0.0052, 14: 0.0022, 15: 0.0008,
+        16: 0.0002, 17: 0.0001, 18: 0.00004, 19: 0.00001, 20: 0.00001
     };
     
     // 计算文本的可靠性评分 (增强版)
@@ -1210,8 +1213,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // 尝试所有可能的栏数（2-10）
         for (let rails = 2; rails <= 10; rails++) {
             const { decrypted, matrix } = railFenceDecrypt(text, rails);
-            const score = calculateReliabilityScore(decrypted);
-            allResults.push({ key: rails, text: decrypted, score, matrix });
+            const scoreResult = calculateRailfenceReliabilityScore(decrypted);
+            allResults.push({ key: rails, text: decrypted, score: scoreResult.score, detailedScore: scoreResult, matrix });
         }
         
         // 默认按照评分排序
@@ -1236,7 +1239,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // 计算详细的可靠性评分组件
-                const detailedScore = getDetailedReliabilityScore(result.text);
+                const detailedScore = result.detailedScore;
                 
                 resultItem.innerHTML = `
                     <div class="result-header">
@@ -1246,11 +1249,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div class="score-details" style="display: none;">
                         <div class="score-component">
-                            <span class="component-label">🔤 ${translations[document.documentElement.lang].letterFreqScore || 'Letter Frequency'}:</span>
+                            <span class="component-label">📏 ${translations[document.documentElement.lang].wordLengthScore || 'Word Length'}:</span>
                             <div class="progress-bar">
-                                <div class="progress" style="width: ${detailedScore.letterFreqScore}%"></div>
+                                <div class="progress" style="width: ${detailedScore.wordLengthScore}%"></div>
                             </div>
-                            <span class="component-value">${detailedScore.letterFreqScore}</span>
+                            <span class="component-value">${detailedScore.wordLengthScore}</span>
                         </div>
                         <div class="score-component">
                             <span class="component-label">📝 ${translations[document.documentElement.lang].wordFreqScore || 'Common Words'}:</span>
@@ -1458,6 +1461,67 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // 栅栏密码专用的评分计算函数 - 使用单词长度而非字母频率
+    function calculateRailfenceReliabilityScore(text) {
+        if (!text || text.trim().length === 0) return 0;
+        
+        // 单词长度分析权重
+        const WORD_LENGTH_WEIGHT = 0.5;
+        // 常用词频率分析权重
+        const WORD_FREQ_WEIGHT = 0.5;
+        
+        // 提取文本中的单词
+        const words = text.toLowerCase().match(/[a-z]+/g) || [];
+        if (words.length === 0) return 0;
+        
+        // 步骤1: 单词长度分析
+        const wordLengthDistribution = {};
+        for (let i = 1; i <= 20; i++) {
+            wordLengthDistribution[i] = 0;
+        }
+        
+        // 统计文本中各长度单词的数量
+        for (let word of words) {
+            const len = Math.min(20, word.length);  // 限制最大长度为20
+            wordLengthDistribution[len] = (wordLengthDistribution[len] || 0) + 1;
+        }
+        
+        // 转换为比例
+        for (let len in wordLengthDistribution) {
+            wordLengthDistribution[len] /= words.length;
+        }
+        
+        // 计算与英语单词长度分布的差异
+        let wordLengthScore = 0;
+        for (let len in englishWordLengthFreq) {
+            const observed = wordLengthDistribution[len] || 0;
+            const expected = englishWordLengthFreq[len];
+            wordLengthScore += Math.pow(observed - expected, 2);
+        }
+        
+        wordLengthScore = Math.sqrt(wordLengthScore);
+        // 转换为0-100分 (越高越匹配)
+        wordLengthScore = Math.max(0, Math.min(100, Math.round((1 - wordLengthScore) * 100)));
+        
+        // 步骤2: 调用现有的词频分析 (从原有函数获取)
+        const wordFreqAnalysis = getDetailedReliabilityScore(text);
+        const wordFreqScore = wordFreqAnalysis.wordFreqScore;
+        
+        // 计算最终加权分数
+        const finalScore = Math.round(
+            wordLengthScore * WORD_LENGTH_WEIGHT +
+            wordFreqScore * WORD_FREQ_WEIGHT
+        );
+        
+        return {
+            score: finalScore,
+            wordLengthScore: wordLengthScore,
+            wordFreqScore: wordFreqScore,
+            commonWordsFound: wordFreqAnalysis.commonWordsFound,
+            commonWordsFoundList: wordFreqAnalysis.commonWordsFoundList
+        };
+    }
+    
     // 初始化常用词模态框功能
     function initCommonWordsModal() {
         const modal = document.getElementById('common-words-modal');
@@ -1474,6 +1538,19 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.style.display = 'block';
             renderCommonWords();
             searchInput.focus();
+            
+            // 显示关闭提示
+            const notification = document.getElementById('copy-notification');
+            if (notification) {
+                const closeText = translations[document.documentElement.lang]['click_to_close'];
+                notification.innerHTML = `<i class="fas fa-info-circle"></i> ${closeText}`;
+                notification.classList.add('show');
+                
+                // 3秒后自动隐藏提示
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
         }
         
         // 关闭模态框

@@ -422,11 +422,6 @@ button[id$="decrypt"] {
     color: white;
 }
 
-button[id="caesar-bruteforce"] {
-    background-color: var(--accent-color);
-    color: white;
-}
-
 button:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px var(--shadow-color);
@@ -1117,6 +1112,43 @@ footer {
         align-items: center;
         justify-content: center;
     }
+
+    /* Improve modal for mobile */
+    .modal-content {
+        width: 95%;
+        margin: 2% auto;
+        max-height: 90vh;
+    }
+    
+    .common-words-controls {
+        flex-direction: column;
+    }
+    
+    .search-container, .add-word-container {
+        width: 100%;
+    }
+    
+    .common-word-item {
+        flex-direction: column;
+        padding: 15px 10px;
+    }
+    
+    .word-column, .frequency-column, .type-column {
+        width: 100%;
+        margin-bottom: 8px;
+        text-align: left;
+    }
+    
+    .frequency-control {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    
+    .delete-word-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+    }
 }
 
 /* 添加反转按钮样式 */
@@ -1284,8 +1316,7 @@ footer {
     
     /* 主要操作按钮优化 */
     button[id$="encrypt"],
-    button[id$="decrypt"],
-    button[id="caesar-bruteforce"] {
+    button[id$="decrypt"] {
         padding: 12px 0;
         font-size: 0.9rem;
     }
@@ -1301,7 +1332,6 @@ footer {
     }
 }
 
-/* 进一步针对极小屏幕的优化 */
 @media (max-width: 360px) {
     header h1 {
         font-size: 1.4rem;
@@ -1326,8 +1356,7 @@ footer {
     }
     
     button[id$="encrypt"],
-    button[id$="decrypt"],
-    button[id="caesar-bruteforce"] {
+    button[id$="decrypt"] {
         font-size: 0.85rem;
         padding: 10px 0;
     }
@@ -1704,13 +1733,14 @@ textarea.highlight-input {
     display: flex;
     align-items: center;
     gap: 8px;
-    transition: background-color 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s;
     position: relative;
     z-index: 1;
 }
 
 .view-dict-btn:hover {
-    background-color: var(--accent-hover-color);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .enhanced-analysis {
