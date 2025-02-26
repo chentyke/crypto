@@ -116,7 +116,22 @@ document.addEventListener('DOMContentLoaded', function() {
             'scoreDetails': 'Score Details',
             'viewDetails': 'View Details',
             'hideDetails': 'Hide Details',
-            'enhanced_analysis': 'Enhanced Analysis'
+            'enhanced_analysis': 'Enhanced Analysis',
+            'common_words_library': 'Common Words Library',
+            'view_common_words': 'View Common Words',
+            'word': 'Word',
+            'frequency': 'Frequency',
+            'type': 'Type',
+            'custom': 'Custom',
+            'default': 'Default',
+            'add_word': 'Add',
+            'word_added': 'Word added successfully',
+            'word_exists': 'This word already exists in the library',
+            'word_letters_only': 'Words can only contain letters',
+            'confirm_delete_word': 'Are you sure you want to delete this word?',
+            'no_words_found': 'No words found',
+            'adjust_weight': 'Adjust Weight',
+            'weight_tooltip': 'Higher weight = greater impact on reliability score'
         },
         'zh': {
             'title': '古典密码工具',
@@ -159,13 +174,34 @@ document.addEventListener('DOMContentLoaded', function() {
             'scoreDetails': '评分详情',
             'viewDetails': '查看详情',
             'hideDetails': '隐藏详情',
-            'enhanced_analysis': '增强分析'
+            'enhanced_analysis': '增强分析',
+            'common_words_library': '常用词库',
+            'view_common_words': '查看常用词',
+            'word': '单词',
+            'frequency': '频率',
+            'type': '类型',
+            'custom': '自定义',
+            'default': '默认',
+            'add_word': '添加',
+            'word_added': '添加成功',
+            'word_exists': '该单词已存在于词库中',
+            'word_letters_only': '单词只能包含字母',
+            'confirm_delete_word': '确定要删除这个单词吗？',
+            'no_words_found': '未找到单词',
+            'adjust_weight': '调整权重',
+            'weight_tooltip': '权重越高 = 对可靠性评分的影响越大'
         }
     };
     
+    // 用户自定义的常用词 (存储在本地)
+    let userDefinedCommonWords = JSON.parse(localStorage.getItem('user-common-words')) || {};
+    
+    // 自定义词的默认权重值
+    const DEFAULT_CUSTOM_WORD_WEIGHT = 0.1;
+    
     // 添加英语字母频率数据 (基于Peter Norvig的分析)
     const englishLetterFreq = {
-        'e': 0.1202, 't': 0.0910, 'a': 0.0812, 'o': 0.0768, 'i': 0.0731,
+        'e': 0.1202, 't': 0.0910, 'a': 0.0812, 'o': 0.0768,
         'n': 0.0695, 's': 0.0628, 'r': 0.0602, 'h': 0.0592, 'd': 0.0432,
         'l': 0.0398, 'u': 0.0288, 'c': 0.0271, 'm': 0.0261, 'f': 0.0230,
         'p': 0.0211, 'y': 0.0209, 'w': 0.0203, 'g': 0.0199, 'b': 0.0154,
@@ -176,15 +212,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // 添加英语常用词频率数据 (基于Google Books数据)
     const englishCommonWords = {
         'the': 0.0714, 'of': 0.0416, 'and': 0.0304, 'to': 0.0260, 'in': 0.0227,
-        'a': 0.0206, 'is': 0.0113, 'that': 0.0108, 'for': 0.0088, 'it': 0.0077,
+        'is': 0.0113, 'that': 0.0108, 'for': 0.0088, 'it': 0.0077,
         'as': 0.0077, 'was': 0.0074, 'with': 0.0070, 'be': 0.0065, 'by': 0.0063,
-        'on': 0.0062, 'not': 0.0061, 'he': 0.0055, 'i': 0.0052, 'this': 0.0051,
+        'on': 0.0062, 'not': 0.0061, 'he': 0.0055, 'this': 0.0051,
         'are': 0.0050, 'or': 0.0049, 'his': 0.0049, 'from': 0.0047, 'at': 0.0046,
         'which': 0.0042, 'but': 0.0038, 'have': 0.0037, 'an': 0.0037, 'had': 0.0035,
         'they': 0.0033, 'you': 0.0031, 'were': 0.0031, 'their': 0.0029, 'one': 0.0029,
         'all': 0.0028, 'we': 0.0028, 'can': 0.0022, 'her': 0.0022, 'has': 0.0022,
         'there': 0.0022, 'been': 0.0022, 'if': 0.0021, 'more': 0.0021, 'when': 0.0020,
-        'will': 0.0020, 'would': 0.0020, 'who': 0.0020, 'so': 0.0019, 'no': 0.0019
+        'will': 0.0020, 'would': 0.0020, 'who': 0.0020, 'so': 0.0019, 'no': 0.0019,
+        // 添加更多常用词 (基于图片中的频率数据)
+        'your': 0.0019, 'them': 0.0018, 'she': 0.0018, 'now': 0.0018, 'out': 0.0018,
+        'into': 0.0017, 'about': 0.0017, 'time': 0.0017, 'up': 0.0017, 'could': 0.0016,
+        'year': 0.0016, 'my': 0.0016, 'than': 0.0016, 'first': 0.0016, 'some': 0.0016,
+        'new': 0.0015, 'very': 0.0015, 'through': 0.0015, 'after': 0.0015, 'down': 0.0015,
+        'should': 0.0015, 'because': 0.0015, 'each': 0.0015, 'just': 0.0014, 'many': 0.0014,
+        'good': 0.0014, 'me': 0.0014, 'say': 0.0014, 'our': 0.0014, 'how': 0.0014,
+        'get': 0.0014, 'most': 0.0014, 'know': 0.0014, 'these': 0.0014, 'over': 0.0014,
+        'like': 0.0014, 'may': 0.0014, 'then': 0.0014, 'other': 0.0014, 'what': 0.0014,
+        'two': 0.0014, 'any': 0.0013, 'only': 0.0013, 'do': 0.0013, 'make': 0.0013,
+        'also': 0.0013, 'did': 0.0013, 'its': 0.0013, 'between': 0.0012, 'before': 0.0012
     };
     
     // 添加英语单词长度分布数据 (基于Google Books数据)
@@ -199,11 +246,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!text || text.trim().length === 0) return 0;
         
         // 字母频率分析权重
-        const LETTER_FREQ_WEIGHT = 0.4;
+        const LETTER_FREQ_WEIGHT = 0.5;
         // 常用词频率分析权重
-        const WORD_FREQ_WEIGHT = 0.4;
-        // 单词长度分布分析权重
-        const WORD_LENGTH_WEIGHT = 0.2;
+        const WORD_FREQ_WEIGHT = 0.5;
         
         // 步骤1: 字母频率分析 (与原有逻辑相同)
         const lettersOnly = text.toLowerCase().replace(/[^a-z]/g, '');
@@ -246,21 +291,37 @@ document.addEventListener('DOMContentLoaded', function() {
             wordFreqMap[word] /= totalWords;
         }
         
+        // 合并默认词库和用户自定义词库
+        const combinedWordLibrary = { ...englishCommonWords, ...userDefinedCommonWords };
+        
         // 计算常用词匹配度 (找出文本中包含的常用词)
         let wordFreqScore = 0;
         let commonWordsFound = 0;
+        let commonWordsFoundList = [];
+        let customWordsFound = 0;
         
-        for (let word in englishCommonWords) {
+        for (let word in combinedWordLibrary) {
             if (wordFreqMap[word]) {
                 const observed = wordFreqMap[word];
-                const expected = englishCommonWords[word];
+                const expected = combinedWordLibrary[word];
+                const isCustomWord = userDefinedCommonWords[word] !== undefined;
                 
-                // 差异的平方
-                const diff = Math.pow(observed - expected, 2);
-                // 将差异贡献加权 (常用词权重更高)
-                wordFreqScore += diff * (1 - expected); // 频率越高的词权重越小
+                // 对于自定义词，根据其实际权重值来提高其对评分的影响
+                // 权重越高，影响越大（权重值通常在0.001-0.15之间）
+                // 转换为10-150倍的影响力
+                const wordImportance = isCustomWord ? (expected * 1000) : 1;
                 
-                commonWordsFound++;
+                // 差异的计算考虑词的重要性
+                wordFreqScore += (Math.pow(observed - expected, 2) * (1 - expected)) / wordImportance;
+                
+                // 根据词的重要性增加计数
+                commonWordsFound += isCustomWord ? Math.min(5, Math.ceil(expected * 30)) : 1;
+                
+                if (isCustomWord) {
+                    customWordsFound++;
+                }
+                
+                commonWordsFoundList.push(word);
             }
         }
         
@@ -269,47 +330,18 @@ document.addEventListener('DOMContentLoaded', function() {
             wordFreqScore = wordFreqScore / commonWordsFound;
             // 根据找到的常用词数量调整分数
             const coverageBonus = Math.min(1, commonWordsFound / 15); // 如果找到15个或更多常用词，获得满分奖励
-            wordFreqScore = Math.max(0, Math.min(100, Math.round((1 - wordFreqScore) * 100 * (0.5 + 0.5 * coverageBonus))));
+            // 增加用户自定义词的奖励
+            const customWordsBonus = customWordsFound > 0 ? (1 + (customWordsFound * 0.2)) : 1;
+            
+            wordFreqScore = Math.max(0, Math.min(100, Math.round((1 - wordFreqScore) * 100 * (0.5 + 0.5 * coverageBonus) * customWordsBonus)));
         } else {
             wordFreqScore = 0; // 没有找到常用词，得分为0
         }
         
-        // 步骤3: 单词长度分布分析
-        const wordLengthMap = {};
-        let totalLength = 0;
-        
-        words.forEach(word => {
-            const length = Math.min(15, word.length); // 限制最大长度为15
-            wordLengthMap[length] = (wordLengthMap[length] || 0) + 1;
-            totalLength += length;
-        });
-        
-        // 计算单词长度分布
-        for (let length in wordLengthMap) {
-            wordLengthMap[length] /= words.length;
-        }
-        
-        // 计算与英语单词长度分布的差异
-        let wordLengthScore = 0;
-        for (let length in englishWordLengthFreq) {
-            const observed = wordLengthMap[length] || 0;
-            const expected = englishWordLengthFreq[length];
-            wordLengthScore += Math.pow(observed - expected, 2);
-        }
-        
-        // 单词平均长度评分 (英语平均4.79个字母/单词)
-        const avgLength = totalLength / words.length;
-        const avgLengthDiff = Math.abs(avgLength - 4.79) / 4.79; // 与英语平均长度的差异比例
-        
-        // 综合考虑分布差异和平均长度差异
-        wordLengthScore = Math.sqrt(wordLengthScore) + avgLengthDiff;
-        wordLengthScore = Math.max(0, Math.min(100, Math.round((1 - wordLengthScore) * 100)));
-        
         // 计算最终加权分数 (各项指标按权重组合)
         const finalScore = Math.round(
             letterFreqScore * LETTER_FREQ_WEIGHT +
-            wordFreqScore * WORD_FREQ_WEIGHT +
-            wordLengthScore * WORD_LENGTH_WEIGHT
+            wordFreqScore * WORD_FREQ_WEIGHT
         );
         
         return finalScore;
@@ -868,13 +900,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             <span class="component-value">${detailedScore.wordFreqScore}</span>
                         </div>
-                        <div class="score-component">
-                            <span class="component-label">📏 ${translations[document.documentElement.lang].wordLengthScore || 'Word Length'}:</span>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: ${detailedScore.wordLengthScore}%"></div>
-                            </div>
-                            <span class="component-value">${detailedScore.wordLengthScore}</span>
-                        </div>
                         <div class="common-words-found">
                             <span>${translations[document.documentElement.lang].commonWordsFound || 'Common words found'}: ${detailedScore.commonWordsFound}</span>
                             ${detailedScore.commonWordsFoundList && detailedScore.commonWordsFoundList.length > 0 
@@ -956,7 +981,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return {
                 letterFreqScore: 0,
                 wordFreqScore: 0,
-                wordLengthScore: 0,
                 commonWordsFound: 0
             };
         }
@@ -967,7 +991,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return {
                 letterFreqScore: 0,
                 wordFreqScore: 0,
-                wordLengthScore: 0,
                 commonWordsFound: 0
             };
         }
@@ -998,7 +1021,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return {
                 letterFreqScore,
                 wordFreqScore: 0,
-                wordLengthScore: 0,
                 commonWordsFound: 0
             };
         }
@@ -1014,63 +1036,77 @@ document.addEventListener('DOMContentLoaded', function() {
             wordFreqMap[word] /= totalWords;
         }
         
+        // 合并默认词库和用户自定义词库，用户词库优先级更高
+        const combinedWordLibrary = { ...englishCommonWords, ...userDefinedCommonWords };
+        
         let wordFreqScore = 0;
         let commonWordsFound = 0;
         let commonWordsFoundList = [];
+        let customWordsFound = 0;
         
-        for (let word in englishCommonWords) {
+        for (let word in combinedWordLibrary) {
             if (wordFreqMap[word]) {
                 const observed = wordFreqMap[word];
-                const expected = englishCommonWords[word];
+                const expected = combinedWordLibrary[word];
+                const isCustomWord = userDefinedCommonWords[word] !== undefined;
                 
-                wordFreqScore += Math.pow(observed - expected, 2) * (1 - expected);
-                commonWordsFound++;
+                // 对于自定义词，根据其实际权重值来提高其对评分的影响
+                // 权重越高，影响越大（权重值通常在0.001-0.15之间）
+                // 转换为10-150倍的影响力
+                const wordImportance = isCustomWord ? (expected * 1000) : 1;
+                
+                // 差异的计算考虑词的重要性
+                wordFreqScore += (Math.pow(observed - expected, 2) * (1 - expected)) / wordImportance;
+                
+                // 根据词的重要性增加计数
+                commonWordsFound += isCustomWord ? Math.min(5, Math.ceil(expected * 30)) : 1;
+                
+                if (isCustomWord) {
+                    customWordsFound++;
+                }
+                
                 commonWordsFoundList.push(word);
             }
         }
         
         if (commonWordsFound > 0) {
             wordFreqScore = wordFreqScore / commonWordsFound;
-            const coverageBonus = Math.min(1, commonWordsFound / 15); 
-            wordFreqScore = Math.max(0, Math.min(100, Math.round((1 - wordFreqScore) * 100 * (0.5 + 0.5 * coverageBonus))));
+            
+            // 增加用户自定义词的奖励
+            const customWordsBonus = customWordsFound > 0 ? (1 + (customWordsFound * 0.2)) : 1;
+            const coverageBonus = Math.min(1, commonWordsFound / 15);
+            
+            wordFreqScore = Math.max(0, Math.min(100, Math.round((1 - wordFreqScore) * 100 * (0.5 + 0.5 * coverageBonus) * customWordsBonus)));
         } else {
             wordFreqScore = 0;
         }
         
-        // 单词长度分布分析
-        const wordLengthMap = {};
-        let totalLength = 0;
-        
-        words.forEach(word => {
-            const length = Math.min(15, word.length);
-            wordLengthMap[length] = (wordLengthMap[length] || 0) + 1;
-            totalLength += length;
-        });
-        
-        for (let length in wordLengthMap) {
-            wordLengthMap[length] /= words.length;
-        }
-        
-        let wordLengthScore = 0;
-        for (let length in englishWordLengthFreq) {
-            const observed = wordLengthMap[length] || 0;
-            const expected = englishWordLengthFreq[length];
-            wordLengthScore += Math.pow(observed - expected, 2);
-        }
-        
-        const avgLength = totalLength / words.length;
-        const avgLengthDiff = Math.abs(avgLength - 4.79) / 4.79;
-        
-        wordLengthScore = Math.sqrt(wordLengthScore) + avgLengthDiff;
-        wordLengthScore = Math.max(0, Math.min(100, Math.round((1 - wordLengthScore) * 100)));
-        
         return {
             letterFreqScore,
             wordFreqScore,
-            wordLengthScore,
             commonWordsFound,
             commonWordsFoundList
         };
+    }
+    
+    // 凯撒密码实现
+    function caesarCipher(text, shift) {
+        return text.split('').map(char => {
+            // 只处理字母
+            if (char.match(/[a-z]/i)) {
+                const code = char.charCodeAt(0);
+                // 大写字母 (ASCII: 65-90)
+                if (code >= 65 && code <= 90) {
+                    return String.fromCharCode(((code - 65 + shift) % 26) + 65);
+                }
+                // 小写字母 (ASCII: 97-122)
+                else if (code >= 97 && code <= 122) {
+                    return String.fromCharCode(((code - 97 + shift) % 26) + 97);
+                }
+            }
+            // 非字母字符保持不变
+            return char;
+        }).join('');
     }
     
     // 栅栏密码功能
@@ -1079,6 +1115,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const railfenceOutput = document.getElementById('railfence-output');
     const railfenceEncryptBtn = document.getElementById('railfence-encrypt');
     const railfenceDecryptBtn = document.getElementById('railfence-decrypt');
+    const railfenceBruteforceBtn = document.getElementById('railfence-bruteforce');
+    const railfenceBruteforceResults = document.getElementById('railfence-bruteforce-results');
+    const railfenceBruteforceContainer = railfenceBruteforceResults.querySelector('.results-container');
     const railfenceVisualization = document.getElementById('railfence-visualization');
     const railContainer = railfenceVisualization.querySelector('.rail-container');
     
@@ -1106,6 +1145,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // 显示栅栏可视化
         visualizeRailFence(matrix, railContainer);
         railfenceVisualization.classList.add('show');
+        
+        // 隐藏暴力破解结果
+        railfenceBruteforceResults.classList.remove('show');
         
         // 添加到历史记录
         addToHistory('railfence', 'encrypt', text, encrypted, key);
@@ -1136,29 +1178,166 @@ document.addEventListener('DOMContentLoaded', function() {
         visualizeRailFence(matrix, railContainer);
         railfenceVisualization.classList.add('show');
         
+        // 隐藏暴力破解结果
+        railfenceBruteforceResults.classList.remove('show');
+        
         // 添加到历史记录
         addToHistory('railfence', 'decrypt', text, decrypted, key);
     });
     
-    // 凯撒密码实现
-    function caesarCipher(text, shift) {
-        return text.split('').map(char => {
-            // 只处理字母
-            if (char.match(/[a-z]/i)) {
-                const code = char.charCodeAt(0);
-                // 大写字母 (ASCII: 65-90)
-                if (code >= 65 && code <= 90) {
-                    return String.fromCharCode(((code - 65 + shift) % 26) + 65);
+    // 栅栏暴力破解
+    railfenceBruteforceBtn.addEventListener('click', () => {
+        const text = railfenceInput.value.trim();
+        if (!text) {
+            alert(translations[document.documentElement.lang]['enter_bruteforce_text']);
+            return;
+        }
+        
+        railfenceBruteforceContainer.innerHTML = '';
+        
+        // 添加排序控制按钮
+        const sortControls = document.createElement('div');
+        sortControls.className = 'sort-controls';
+        sortControls.innerHTML = `
+            <button class="sort-btn sort-by-score">${translations[document.documentElement.lang]['sort_by_score']}</button>
+            <button class="sort-btn sort-by-key">${translations[document.documentElement.lang]['sort_by_key']}</button>
+        `;
+        railfenceBruteforceContainer.appendChild(sortControls);
+        
+        // 所有可能的结果
+        let allResults = [];
+        
+        // 尝试所有可能的栏数（2-10）
+        for (let rails = 2; rails <= 10; rails++) {
+            const { decrypted, matrix } = railFenceDecrypt(text, rails);
+            const score = calculateReliabilityScore(decrypted);
+            allResults.push({ key: rails, text: decrypted, score, matrix });
+        }
+        
+        // 默认按照评分排序
+        allResults.sort((a, b) => b.score - a.score);
+        
+        // 渲染结果
+        function renderRailfenceResults() {
+            // 清除旧结果（保留排序控制按钮）
+            const sortControlsElement = railfenceBruteforceContainer.querySelector('.sort-controls');
+            railfenceBruteforceContainer.innerHTML = '';
+            railfenceBruteforceContainer.appendChild(sortControlsElement);
+            
+            allResults.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.setAttribute('data-key', result.key);
+                resultItem.setAttribute('data-score', result.score);
+                
+                // 如果是当前选择的密钥，突出显示
+                if (parseInt(railfenceKey.value) === result.key) {
+                    resultItem.classList.add('highlighted');
                 }
-                // 小写字母 (ASCII: 97-122)
-                else if (code >= 97 && code <= 122) {
-                    return String.fromCharCode(((code - 97 + shift) % 26) + 97);
-                }
-            }
-            // 非字母字符保持不变
-            return char;
-        }).join('');
-    }
+                
+                // 计算详细的可靠性评分组件
+                const detailedScore = getDetailedReliabilityScore(result.text);
+                
+                resultItem.innerHTML = `
+                    <div class="result-header">
+                        <div class="key-label">${translations[document.documentElement.lang]['rails']}: ${result.key}</div>
+                        <div class="score-label">${translations[document.documentElement.lang]['reliability_score']}: ${result.score}</div>
+                        <div class="score-details-toggle"><i class="fas fa-info-circle"></i></div>
+                    </div>
+                    <div class="score-details" style="display: none;">
+                        <div class="score-component">
+                            <span class="component-label">🔤 ${translations[document.documentElement.lang].letterFreqScore || 'Letter Frequency'}:</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: ${detailedScore.letterFreqScore}%"></div>
+                            </div>
+                            <span class="component-value">${detailedScore.letterFreqScore}</span>
+                        </div>
+                        <div class="score-component">
+                            <span class="component-label">📝 ${translations[document.documentElement.lang].wordFreqScore || 'Common Words'}:</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: ${detailedScore.wordFreqScore}%"></div>
+                            </div>
+                            <span class="component-value">${detailedScore.wordFreqScore}</span>
+                        </div>
+                        <div class="common-words-found">
+                            <span>${translations[document.documentElement.lang].commonWordsFound || 'Common words found'}: ${detailedScore.commonWordsFound}</span>
+                            ${detailedScore.commonWordsFoundList && detailedScore.commonWordsFoundList.length > 0 
+                                ? `<div class="common-words-tags">
+                                    ${detailedScore.commonWordsFoundList.map(word => 
+                                        `<span class="word-tag">${word}</span>`).join('')}
+                                </div>` 
+                                : ''}
+                        </div>
+                    </div>
+                    <div class="result-text">${result.text}</div>
+                `;
+                
+                // 点击结果项应用该密钥
+                resultItem.addEventListener('click', function(e) {
+                    // 如果点击的是详情切换按钮，则只显示/隐藏详情
+                    if (e.target.closest('.score-details-toggle')) {
+                        const detailsElement = this.querySelector('.score-details');
+                        if (detailsElement) {
+                            detailsElement.style.display = 
+                                detailsElement.style.display === 'none' ? 'block' : 'none';
+                        }
+                        return;
+                    }
+                    
+                    // 设置密钥
+                    railfenceKey.value = result.key;
+                    
+                    // 重新显示结果突出当前选中项
+                    document.querySelectorAll('.result-item').forEach(item => {
+                        if (parseInt(item.getAttribute('data-key')) === result.key) {
+                            item.classList.add('highlighted');
+                        } else {
+                            item.classList.remove('highlighted');
+                        }
+                    });
+                    
+                    // 更新输出
+                    railfenceOutput.textContent = result.text;
+                    railfenceOutput.classList.add('highlight');
+                    setTimeout(() => {
+                        railfenceOutput.classList.remove('highlight');
+                    }, 1000);
+                    
+                    // 显示栅栏可视化
+                    visualizeRailFence(result.matrix, railContainer);
+                    railfenceVisualization.classList.add('show');
+                });
+                
+                railfenceBruteforceContainer.appendChild(resultItem);
+            });
+        }
+        
+        // 渲染初始结果
+        renderRailfenceResults();
+        
+        // 添加排序事件监听器
+        document.querySelector('#railfence-bruteforce-results .sort-by-score').addEventListener('click', () => {
+            allResults.sort((a, b) => b.score - a.score);
+            renderRailfenceResults();
+        });
+        
+        document.querySelector('#railfence-bruteforce-results .sort-by-key').addEventListener('click', () => {
+            allResults.sort((a, b) => a.key - b.key);
+            renderRailfenceResults();
+        });
+        
+        // 显示暴力破解结果
+        railfenceBruteforceResults.classList.add('show');
+        railfenceVisualization.classList.remove('show');
+        
+        // 添加到历史记录 - 使用当前设置的密钥作为结果
+        const currentKey = parseInt(railfenceKey.value);
+        const currentResult = allResults.find(r => r.key === currentKey)?.text || "";
+        addToHistory('railfence', 'bruteforce', text, currentResult, currentKey);
+        
+        // 平滑滚动到结果区域
+        railfenceBruteforceResults.scrollIntoView({ behavior: 'smooth' });
+    });
     
     // 栅栏密码加密
     function railFenceEncrypt(text, rails) {
@@ -1278,4 +1457,216 @@ document.addEventListener('DOMContentLoaded', function() {
             container.appendChild(rail);
         }
     }
+    
+    // 初始化常用词模态框功能
+    function initCommonWordsModal() {
+        const modal = document.getElementById('common-words-modal');
+        const closeBtn = modal.querySelector('.close-modal');
+        const viewBtnCaesar = document.getElementById('view-common-words-btn');
+        const viewBtnRailFence = document.getElementById('view-common-words-btn-rf');
+        const searchInput = document.getElementById('search-common-words');
+        const addButton = document.getElementById('add-common-word');
+        const newWordInput = document.getElementById('new-common-word');
+        const wordsContainer = document.getElementById('common-words-container');
+        
+        // 打开模态框
+        function openModal() {
+            modal.style.display = 'block';
+            renderCommonWords();
+            searchInput.focus();
+        }
+        
+        // 关闭模态框
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+        
+        // 搜索功能
+        searchInput.addEventListener('input', renderCommonWords);
+        
+        // 添加新词
+        addButton.addEventListener('click', addNewCommonWord);
+        newWordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addNewCommonWord();
+            }
+        });
+        
+        function renderCommonWords() {
+            wordsContainer.innerHTML = '';
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            // 合并默认词库和用户自定义词库
+            const allWords = { ...englishCommonWords, ...userDefinedCommonWords };
+            
+            // 转换为数组以便排序
+            const wordArray = Object.entries(allWords).filter(([word]) => {
+                return word.includes(searchTerm);
+            });
+            
+            // 按频率排序 (从高到低)
+            wordArray.sort((a, b) => b[1] - a[1]);
+            
+            // 渲染列表
+            wordArray.forEach(([word, frequency]) => {
+                const isCustom = userDefinedCommonWords[word] !== undefined;
+                
+                const wordItem = document.createElement('div');
+                wordItem.className = 'common-word-item';
+                
+                // Basic word info
+                const wordInfo = document.createElement('div');
+                wordInfo.className = 'word-column';
+                wordInfo.textContent = word;
+                
+                // Type indicator
+                const typeElement = document.createElement('div');
+                typeElement.className = 'type-column';
+                const typeSpan = document.createElement('span');
+                typeSpan.className = `word-type ${isCustom ? 'word-type-custom' : 'word-type-default'}`;
+                typeSpan.textContent = isCustom ? 
+                    (translations[document.documentElement.lang].custom || 'Custom') : 
+                    (translations[document.documentElement.lang].default || 'Default');
+                typeElement.appendChild(typeSpan);
+                
+                // Frequency display/control
+                const freqElement = document.createElement('div');
+                freqElement.className = 'frequency-column';
+                
+                if (isCustom) {
+                    // For custom words, show adjustment slider
+                    const freqControl = document.createElement('div');
+                    freqControl.className = 'frequency-control';
+                    
+                    // Add label with tooltip
+                    const freqLabel = document.createElement('span');
+                    freqLabel.className = 'freq-label';
+                    freqLabel.title = translations[document.documentElement.lang].weight_tooltip || 'Higher weight = greater impact on reliability score';
+                    freqLabel.innerHTML = '<i class="fas fa-info-circle"></i>';
+                    
+                    const slider = document.createElement('input');
+                    slider.type = 'range';
+                    slider.className = 'frequency-slider';
+                    slider.min = '0.001';
+                    slider.max = '0.15';
+                    slider.step = '0.001';
+                    slider.value = frequency.toString();
+                    slider.title = translations[document.documentElement.lang].adjust_weight || 'Adjust Weight';
+                    
+                    const valueDisplay = document.createElement('span');
+                    valueDisplay.className = 'frequency-value';
+                    valueDisplay.textContent = frequency.toFixed(4);
+                    
+                    // Update value when slider changes
+                    slider.addEventListener('input', function() {
+                        const newValue = parseFloat(this.value);
+                        valueDisplay.textContent = newValue.toFixed(4);
+                        userDefinedCommonWords[word] = newValue;
+                        localStorage.setItem('user-common-words', JSON.stringify(userDefinedCommonWords));
+                    });
+                    
+                    freqControl.appendChild(freqLabel);
+                    freqControl.appendChild(slider);
+                    freqControl.appendChild(valueDisplay);
+                    freqElement.appendChild(freqControl);
+                } else {
+                    // For default words, just show the value
+                    freqElement.textContent = frequency.toFixed(4);
+                }
+                
+                // Add elements to the word item
+                wordItem.appendChild(wordInfo);
+                wordItem.appendChild(freqElement);
+                wordItem.appendChild(typeElement);
+                
+                if (isCustom) {
+                    // 添加删除按钮
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-word-btn';
+                    deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    deleteBtn.title = translations[document.documentElement.lang].delete || 'Delete';
+                    
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        
+                        if (confirm(translations[document.documentElement.lang].confirm_delete_word || 'Are you sure you want to delete this word?')) {
+                            delete userDefinedCommonWords[word];
+                            localStorage.setItem('user-common-words', JSON.stringify(userDefinedCommonWords));
+                            renderCommonWords();
+                        }
+                    });
+                    
+                    wordItem.appendChild(deleteBtn);
+                }
+                
+                wordsContainer.appendChild(wordItem);
+            });
+            
+            // 如果没有结果，显示提示
+            if (wordArray.length === 0) {
+                const noResults = document.createElement('div');
+                noResults.className = 'no-results';
+                noResults.textContent = translations[document.documentElement.lang].no_words_found || 'No words found';
+                wordsContainer.appendChild(noResults);
+            }
+        }
+        
+        function addNewCommonWord() {
+            const newWord = newWordInput.value.trim().toLowerCase();
+            if (!newWord) return;
+            
+            // 验证输入只包含字母
+            if (!/^[a-z]+$/.test(newWord)) {
+                alert(translations[document.documentElement.lang].word_letters_only || 'Words can only contain letters');
+                return;
+            }
+            
+            // 如果已存在，提示用户
+            if (englishCommonWords[newWord] || userDefinedCommonWords[newWord]) {
+                alert(translations[document.documentElement.lang].word_exists || 'This word already exists in the library');
+                return;
+            }
+            
+            // 添加新词 - 给予高频率权重
+            userDefinedCommonWords[newWord] = DEFAULT_CUSTOM_WORD_WEIGHT;
+            
+            // 保存到本地存储
+            localStorage.setItem('user-common-words', JSON.stringify(userDefinedCommonWords));
+            
+            // 清空输入并重新渲染
+            newWordInput.value = '';
+            renderCommonWords();
+            
+            // 显示成功添加的通知
+            const notification = document.createElement('div');
+            notification.className = 'word-added-notification';
+            notification.textContent = translations[document.documentElement.lang].word_added || 'Word added successfully';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 2000);
+            }, 10);
+        }
+        
+        // 绑定事件
+        viewBtnCaesar.addEventListener('click', openModal);
+        viewBtnRailFence.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        
+        // 点击模态框外部关闭
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+    }
+    
+    // 在DOMContentLoaded事件中初始化模态框
+    initCommonWordsModal();
 }); 

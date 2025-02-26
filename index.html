@@ -70,6 +70,10 @@
                         <div class="results-container"></div>
                     </div>
                 </div>
+                <div class="enhanced-analysis">
+                    <h3><span data-lang="enhanced_analysis">Enhanced Analysis</span></h3>
+                    <button id="view-common-words-btn" class="view-dict-btn"><i class="fas fa-book"></i> <span data-lang="view_common_words">View Common Words</span></button>
+                </div>
             </div>
 
             <!-- 栅栏密码部分 -->
@@ -98,6 +102,7 @@
                     <div class="actions">
                         <button id="railfence-encrypt"><i class="fas fa-lock"></i> <span data-lang="encrypt">Encrypt</span></button>
                         <button id="railfence-decrypt"><i class="fas fa-unlock"></i> <span data-lang="decrypt">Decrypt</span></button>
+                        <button id="railfence-bruteforce"><i class="fas fa-hammer"></i> <span data-lang="bruteforce">Brute Force</span></button>
                         <button id="railfence-swap" class="swap-btn" title="Swap encrypt/decrypt"><i class="fas fa-sync-alt"></i></button>
                     </div>
                 </div>
@@ -111,6 +116,14 @@
                         <h3><span data-lang="rail_visualization">Rail Fence Visualization:</span></h3>
                         <div class="rail-container"></div>
                     </div>
+                    <div id="railfence-bruteforce-results" class="bruteforce-results">
+                        <h3><span data-lang="bruteforce_results">Brute Force Results:</span></h3>
+                        <div class="results-container"></div>
+                    </div>
+                </div>
+                <div class="enhanced-analysis">
+                    <h3><span data-lang="enhanced_analysis">Enhanced Analysis</span></h3>
+                    <button id="view-common-words-btn-rf" class="view-dict-btn"><i class="fas fa-book"></i> <span data-lang="view_common_words">View Common Words</span></button>
                 </div>
             </div>
         </div>
@@ -132,6 +145,34 @@
 
     <div class="notification" id="copy-notification">
         <i class="fas fa-check-circle"></i> <span data-lang="copied">Copied to clipboard</span>
+    </div>
+
+    <div id="common-words-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><span data-lang="common_words_library">Common Words Library</span></h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="common-words-controls">
+                    <div class="search-container">
+                        <input type="text" id="search-common-words" placeholder="Search words...">
+                    </div>
+                    <div class="add-word-container">
+                        <input type="text" id="new-common-word" placeholder="Add new word...">
+                        <button id="add-common-word"><i class="fas fa-plus"></i> <span data-lang="add_word">Add</span></button>
+                    </div>
+                </div>
+                <div class="common-words-list">
+                    <div class="list-header">
+                        <div class="word-column"><span data-lang="word">Word</span></div>
+                        <div class="frequency-column"><span data-lang="frequency">Frequency</span></div>
+                        <div class="type-column"><span data-lang="type">Type</span></div>
+                    </div>
+                    <div id="common-words-container"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>

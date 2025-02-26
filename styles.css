@@ -1468,4 +1468,330 @@ textarea.highlight-input {
 .result-item:hover .result-text {
     background-color: #f0f6ff;
     border-left-color: #0d6efd;
+}
+
+/* Common Words Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: var(--bg-white);
+    margin: 5% auto;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    width: 80%;
+    max-width: 900px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    animation: modalFadeIn 0.3s;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes modalFadeIn {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+.modal-header {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 10px 10px 0 0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.close-modal {
+    color: var(--text-color);
+    font-size: 1.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close-modal:hover {
+    color: var(--accent-color);
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.common-words-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.search-container, .add-word-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#search-common-words, #new-common-word {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-white);
+    color: var(--text-color);
+    font-size: 0.9rem;
+    width: 250px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+
+#add-common-word {
+    padding: 8px 16px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#add-common-word:hover {
+    background-color: var(--accent-hover-color);
+}
+
+.common-words-list {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: var(--bg-white);
+    box-shadow: 0 2px 5px var(--shadow-color);
+}
+
+.list-header {
+    display: flex;
+    padding: 10px 15px;
+    background-color: var(--primary-light);
+    font-weight: bold;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.word-column {
+    flex: 2;
+    font-weight: 500;
+}
+
+.frequency-column {
+    flex: 1;
+    text-align: center;
+    font-family: monospace;
+    font-size: 0.95rem;
+}
+
+.type-column {
+    flex: 1;
+    text-align: center;
+}
+
+#common-words-container {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.common-word-item {
+    display: flex;
+    padding: 8px 15px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s;
+    align-items: center;
+}
+
+.common-word-item:nth-child(odd) {
+    background-color: var(--bg-light);
+}
+
+.common-word-item:hover {
+    background-color: rgba(102, 88, 211, 0.05);
+}
+
+.word-type {
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: inline-block;
+}
+
+.word-type-default {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.word-type-custom {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+/* Add styles for the word added notification and delete button */
+.word-added-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: var(--accent-color);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 4px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1100;
+    transform: translateX(120%);
+    transition: transform 0.3s ease-out;
+    max-width: 300px;
+}
+
+.word-added-notification.show {
+    transform: translateX(0);
+}
+
+.no-results {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.delete-word-btn {
+    background: none;
+    border: none;
+    color: #ff5252;
+    cursor: pointer;
+    padding: 5px;
+    margin-left: 10px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.delete-word-btn:hover {
+    background-color: rgba(255, 82, 82, 0.1);
+}
+
+/* Add styles for the view dictionary button */
+.view-dict-btn {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin: 10px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s;
+    position: relative;
+    z-index: 1;
+}
+
+.view-dict-btn:hover {
+    background-color: var(--accent-hover-color);
+}
+
+.enhanced-analysis {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: var(--card-bg);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+/* Add styles for the frequency adjustment controls */
+.frequency-control {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    justify-content: center;
+}
+
+.frequency-slider {
+    width: 80px;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #ddd;
+    outline: none;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.frequency-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    transition: all 0.2s ease;
+}
+
+.frequency-slider::-webkit-slider-thumb:hover {
+    background: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.frequency-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    transition: all 0.2s ease;
+}
+
+.frequency-slider::-moz-range-thumb:hover {
+    background: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.frequency-value {
+    min-width: 50px;
+    font-size: 0.85rem;
+    color: var(--text-color);
+    font-family: monospace;
+    text-align: center;
+}
+
+.freq-label {
+    color: var(--text-light);
+    margin-right: 2px;
+    cursor: help;
+    font-size: 14px;
+}
+
+.freq-label i {
+    transition: color 0.2s;
+}
+
+.freq-label:hover i {
+    color: var(--primary-color);
 } 
