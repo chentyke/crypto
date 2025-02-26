@@ -959,21 +959,26 @@ footer {
     }
 
     /* 优化复制按钮 */
+    .output-header {
+        display: flex;
+        justify-content: flex-end;
+    }
+    
     .copy-btn {
-        padding: 6px 10px;
+        padding: 5px 8px;
         font-size: 0.85rem;
-        /* 增加点击区域 */
-        min-height: 38px;
-        min-width: 50px;
-        /* 增强触摸反馈 */
+        /* 减小尺寸 */
+        min-height: 32px;
+        min-width: 42px;
+        /* 右边距 */
+        margin-left: auto;
         transition: all 0.2s ease;
-        /* 提高视觉层次感 */
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
     }
     
     .copy-btn i {
-        margin-right: 4px;
-        font-size: 0.9rem;
+        margin-right: 3px;
+        font-size: 0.85rem;
     }
     
     /* 添加点击波纹效果 */
@@ -1190,8 +1195,15 @@ footer {
     }
 
     .copy-btn {
-        padding: 5px 8px;
-        font-size: 0.8rem;
+        padding: 4px 6px;
+        font-size: 0.75rem;
+        min-height: 28px;
+        min-width: 36px;
+    }
+    
+    .copy-btn i {
+        font-size: 0.75rem;
+        margin-right: 2px;
     }
     
     /* 改进输入表单和按钮的间距 */
