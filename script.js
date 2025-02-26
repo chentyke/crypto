@@ -114,16 +114,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         randomBtn.addEventListener('click', () => {
-            const sampleTexts = [
+            // 判断是哪种密码的文本区域
+            const isCaesar = textarea.id === 'caesar-input';
+            
+            // 凯撒密码只能处理英文字母，所以只提供英文样本
+            const caesarSampleTexts = [
+                "the quick brown fox jumps over the lazy dog",
+                "hello world this is a test message for encryption",
+                "caesar cipher is one of the oldest encryption techniques",
+                "cryptography is the practice of secure communication",
+                "we need to protect our secret messages from enemies"
+            ];
+            
+            // 栅栏密码可以处理任何字符
+            const railFenceSampleTexts = [
                 "the quick brown fox jumps over the lazy dog",
                 "hello world, this is a test message for encryption",
-                "caesar cipher is one of the oldest encryption techniques",
                 "rail fence cipher creates a zigzag pattern",
                 "cryptography is the practice of secure communication",
                 "古典密码学包括凯撒密码和栅栏密码等加密方法",
-                "计算机科学与密码学有着密切的关系"
+                "计算机科学与密码学有着密切的关系",
+                "Rail fence cipher can handle numbers like 12345 and symbols !@#$%"
             ];
             
+            const sampleTexts = isCaesar ? caesarSampleTexts : railFenceSampleTexts;
             const randomText = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
             textarea.value = randomText;
             textarea.dispatchEvent(new Event('input')); // 触发input事件更新字符计数
