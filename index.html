@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古典密码工具</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-lock"></i> 古典密码工具</h1>
+            <p>实现凯撒密码和栅栏密码的加解密</p>
+            <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="checkbox">
+                    <input type="checkbox" id="checkbox" />
+                    <div class="slider round"></div>
+                </label>
+                <span class="theme-label">深色模式</span>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="caesar"><i class="fas fa-key"></i> 凯撒密码</button>
+            <button class="tab-btn" data-tab="railfence"><i class="fas fa-bars"></i> 栅栏密码</button>
+        </div>
+
+        <div class="tab-content">
+            <!-- 凯撒密码部分 -->
+            <div class="tab-pane active" id="caesar">
+                <div class="input-section">
+                    <h2><i class="fas fa-key"></i> 凯撒密码</h2>
+                    <div class="form-group">
+                        <label for="caesar-input">输入文本：</label>
+                        <div class="textarea-container">
+                            <textarea id="caesar-input" placeholder="请输入要处理的文本..."></textarea>
+                            <div class="textarea-actions">
+                                <button class="icon-btn clear-btn" title="清空文本"><i class="fas fa-times"></i></button>
+                                <button class="icon-btn random-btn" title="生成随机文本"><i class="fas fa-random"></i></button>
+                            </div>
+                        </div>
+                        <div class="character-count"><span id="caesar-char-count">0</span> 个字符</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="caesar-key">位移量 (1-25)：</label>
+                        <div class="input-with-buttons">
+                            <button class="key-btn decrease-key"><i class="fas fa-minus"></i></button>
+                            <input type="number" id="caesar-key" min="1" max="25" value="3">
+                            <button class="key-btn increase-key"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button id="caesar-encrypt"><i class="fas fa-lock"></i> 加密</button>
+                        <button id="caesar-decrypt"><i class="fas fa-unlock"></i> 解密</button>
+                        <button id="caesar-bruteforce"><i class="fas fa-hammer"></i> 暴力破解</button>
+                    </div>
+                </div>
+                <div class="output-section">
+                    <div class="output-header">
+                        <h3>结果：</h3>
+                        <button class="copy-btn" id="caesar-copy-btn" title="复制结果"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div id="caesar-output" class="output"></div>
+                    
+                    <div id="caesar-bruteforce-results" class="bruteforce-results">
+                        <h3>暴力破解结果：</h3>
+                        <div class="results-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 栅栏密码部分 -->
+            <div class="tab-pane" id="railfence">
+                <div class="input-section">
+                    <h2><i class="fas fa-bars"></i> 栅栏密码</h2>
+                    <div class="form-group">
+                        <label for="railfence-input">输入文本：</label>
+                        <div class="textarea-container">
+                            <textarea id="railfence-input" placeholder="请输入要处理的文本..."></textarea>
+                            <div class="textarea-actions">
+                                <button class="icon-btn clear-btn" title="清空文本"><i class="fas fa-times"></i></button>
+                                <button class="icon-btn random-btn" title="生成随机文本"><i class="fas fa-random"></i></button>
+                            </div>
+                        </div>
+                        <div class="character-count"><span id="railfence-char-count">0</span> 个字符</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="railfence-key">栏数 (2-10)：</label>
+                        <div class="input-with-buttons">
+                            <button class="key-btn decrease-key"><i class="fas fa-minus"></i></button>
+                            <input type="number" id="railfence-key" min="2" max="10" value="3">
+                            <button class="key-btn increase-key"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button id="railfence-encrypt"><i class="fas fa-lock"></i> 加密</button>
+                        <button id="railfence-decrypt"><i class="fas fa-unlock"></i> 解密</button>
+                    </div>
+                </div>
+                <div class="output-section">
+                    <div class="output-header">
+                        <h3>结果：</h3>
+                        <button class="copy-btn" id="railfence-copy-btn" title="复制结果"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div id="railfence-output" class="output"></div>
+                    <div id="railfence-visualization" class="visualization">
+                        <h3>栅栏可视化：</h3>
+                        <div class="rail-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <h3><i class="fas fa-history"></i> 历史记录</h3>
+            <div class="history-container">
+                <!-- 历史记录将通过JS动态添加 -->
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2025 CNS｜凯撒密码 & 栅栏密码</p>
+            <div class="social-icons">
+                <a href="#" title="GitHub"><i class="fab fa-github"></i></a>
+                <a href="#" title="帮助"><i class="fas fa-question-circle"></i></a>
+            </div>
+        </footer>
+    </div>
+
+    <div class="notification" id="copy-notification">
+        <i class="fas fa-check-circle"></i> 已复制到剪贴板
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
