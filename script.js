@@ -108,7 +108,15 @@ document.addEventListener('DOMContentLoaded', function() {
             'reliability_score': 'Reliability Score',
             'sort_by_score': 'Sort by Score',
             'sort_by_key': 'Sort by Key',
-            'copy': 'Copy'
+            'copy': 'Copy',
+            'letterFreqScore': 'Letter Frequency',
+            'wordFreqScore': 'Common Words',
+            'wordLengthScore': 'Word Length',
+            'commonWordsFound': 'Common words found',
+            'scoreDetails': 'Score Details',
+            'viewDetails': 'View Details',
+            'hideDetails': 'Hide Details',
+            'enhanced_analysis': 'Enhanced Analysis'
         },
         'zh': {
             'title': '古典密码工具',
@@ -143,7 +151,15 @@ document.addEventListener('DOMContentLoaded', function() {
             'reliability_score': '可靠性评分',
             'sort_by_score': '按评分排序',
             'sort_by_key': '按密钥排序',
-            'copy': '复制'
+            'copy': '复制',
+            'letterFreqScore': '字母频率',
+            'wordFreqScore': '常用词',
+            'wordLengthScore': '单词长度',
+            'commonWordsFound': '发现的常用词',
+            'scoreDetails': '评分详情',
+            'viewDetails': '查看详情',
+            'hideDetails': '隐藏详情',
+            'enhanced_analysis': '增强分析'
         }
     };
     
@@ -157,38 +173,146 @@ document.addEventListener('DOMContentLoaded', function() {
         'z': 0.0007
     };
     
-    // 计算文本的可靠性评分
+    // 添加英语常用词频率数据 (基于Google Books数据)
+    const englishCommonWords = {
+        'the': 0.0714, 'of': 0.0416, 'and': 0.0304, 'to': 0.0260, 'in': 0.0227,
+        'a': 0.0206, 'is': 0.0113, 'that': 0.0108, 'for': 0.0088, 'it': 0.0077,
+        'as': 0.0077, 'was': 0.0074, 'with': 0.0070, 'be': 0.0065, 'by': 0.0063,
+        'on': 0.0062, 'not': 0.0061, 'he': 0.0055, 'i': 0.0052, 'this': 0.0051,
+        'are': 0.0050, 'or': 0.0049, 'his': 0.0049, 'from': 0.0047, 'at': 0.0046,
+        'which': 0.0042, 'but': 0.0038, 'have': 0.0037, 'an': 0.0037, 'had': 0.0035,
+        'they': 0.0033, 'you': 0.0031, 'were': 0.0031, 'their': 0.0029, 'one': 0.0029,
+        'all': 0.0028, 'we': 0.0028, 'can': 0.0022, 'her': 0.0022, 'has': 0.0022,
+        'there': 0.0022, 'been': 0.0022, 'if': 0.0021, 'more': 0.0021, 'when': 0.0020,
+        'will': 0.0020, 'would': 0.0020, 'who': 0.0020, 'so': 0.0019, 'no': 0.0019
+    };
+    
+    // 添加英语单词长度分布数据 (基于Google Books数据)
+    const englishWordLengthFreq = {
+        1: 0.0299, 2: 0.1765, 3: 0.2051, 4: 0.1479, 5: 0.1070,
+        6: 0.0839, 7: 0.0794, 8: 0.0594, 9: 0.0444, 10: 0.0308,
+        11: 0.0176, 12: 0.0096, 13: 0.0052, 14: 0.0022, 15: 0.0008
+    };
+    
+    // 计算文本的可靠性评分 (增强版)
     function calculateReliabilityScore(text) {
-        // 只计算字母
+        if (!text || text.trim().length === 0) return 0;
+        
+        // 字母频率分析权重
+        const LETTER_FREQ_WEIGHT = 0.4;
+        // 常用词频率分析权重
+        const WORD_FREQ_WEIGHT = 0.4;
+        // 单词长度分布分析权重
+        const WORD_LENGTH_WEIGHT = 0.2;
+        
+        // 步骤1: 字母频率分析 (与原有逻辑相同)
         const lettersOnly = text.toLowerCase().replace(/[^a-z]/g, '');
         if (lettersOnly.length === 0) return 0;
         
-        // 计算字母频率
-        const freqMap = {};
+        const letterFreqMap = {};
         for (let char of lettersOnly) {
-            freqMap[char] = (freqMap[char] || 0) + 1;
+            letterFreqMap[char] = (letterFreqMap[char] || 0) + 1;
         }
         
-        // 计算每个字母的频率
-        for (let char in freqMap) {
-            freqMap[char] /= lettersOnly.length;
+        for (let char in letterFreqMap) {
+            letterFreqMap[char] /= lettersOnly.length;
         }
         
-        // 计算与英语字母频率的差异 (欧几里得距离的平方)
-        let score = 0;
+        let letterFreqScore = 0;
         for (let char in englishLetterFreq) {
-            const observed = freqMap[char] || 0;
+            const observed = letterFreqMap[char] || 0;
             const expected = englishLetterFreq[char];
-            score += Math.pow(observed - expected, 2);
+            letterFreqScore += Math.pow(observed - expected, 2);
         }
         
-        // 计算语言频率得分 (值越低越匹配英语)
-        score = Math.sqrt(score);
+        letterFreqScore = Math.sqrt(letterFreqScore);
+        // 转换为0-100分 (越高越匹配)
+        letterFreqScore = Math.max(0, Math.min(100, Math.round((1 - letterFreqScore) * 100)));
         
-        // 将得分转换为0-100的范围，0表示完全不匹配，100表示完全匹配
-        const normalizedScore = Math.max(0, Math.min(100, Math.round((1 - score) * 100)));
+        // 步骤2: 常用词频率分析
+        // 提取文本中的单词
+        const words = text.toLowerCase().match(/[a-z]+/g) || [];
+        if (words.length === 0) return letterFreqScore * LETTER_FREQ_WEIGHT;
         
-        return normalizedScore;
+        // 统计单词出现频率
+        const wordFreqMap = {};
+        const totalWords = words.length;
+        
+        for (let word of words) {
+            wordFreqMap[word] = (wordFreqMap[word] || 0) + 1;
+        }
+        
+        for (let word in wordFreqMap) {
+            wordFreqMap[word] /= totalWords;
+        }
+        
+        // 计算常用词匹配度 (找出文本中包含的常用词)
+        let wordFreqScore = 0;
+        let commonWordsFound = 0;
+        
+        for (let word in englishCommonWords) {
+            if (wordFreqMap[word]) {
+                const observed = wordFreqMap[word];
+                const expected = englishCommonWords[word];
+                
+                // 差异的平方
+                const diff = Math.pow(observed - expected, 2);
+                // 将差异贡献加权 (常用词权重更高)
+                wordFreqScore += diff * (1 - expected); // 频率越高的词权重越小
+                
+                commonWordsFound++;
+            }
+        }
+        
+        // 如果找到常用词，计算加权平均差异
+        if (commonWordsFound > 0) {
+            wordFreqScore = wordFreqScore / commonWordsFound;
+            // 根据找到的常用词数量调整分数
+            const coverageBonus = Math.min(1, commonWordsFound / 15); // 如果找到15个或更多常用词，获得满分奖励
+            wordFreqScore = Math.max(0, Math.min(100, Math.round((1 - wordFreqScore) * 100 * (0.5 + 0.5 * coverageBonus))));
+        } else {
+            wordFreqScore = 0; // 没有找到常用词，得分为0
+        }
+        
+        // 步骤3: 单词长度分布分析
+        const wordLengthMap = {};
+        let totalLength = 0;
+        
+        words.forEach(word => {
+            const length = Math.min(15, word.length); // 限制最大长度为15
+            wordLengthMap[length] = (wordLengthMap[length] || 0) + 1;
+            totalLength += length;
+        });
+        
+        // 计算单词长度分布
+        for (let length in wordLengthMap) {
+            wordLengthMap[length] /= words.length;
+        }
+        
+        // 计算与英语单词长度分布的差异
+        let wordLengthScore = 0;
+        for (let length in englishWordLengthFreq) {
+            const observed = wordLengthMap[length] || 0;
+            const expected = englishWordLengthFreq[length];
+            wordLengthScore += Math.pow(observed - expected, 2);
+        }
+        
+        // 单词平均长度评分 (英语平均4.79个字母/单词)
+        const avgLength = totalLength / words.length;
+        const avgLengthDiff = Math.abs(avgLength - 4.79) / 4.79; // 与英语平均长度的差异比例
+        
+        // 综合考虑分布差异和平均长度差异
+        wordLengthScore = Math.sqrt(wordLengthScore) + avgLengthDiff;
+        wordLengthScore = Math.max(0, Math.min(100, Math.round((1 - wordLengthScore) * 100)));
+        
+        // 计算最终加权分数 (各项指标按权重组合)
+        const finalScore = Math.round(
+            letterFreqScore * LETTER_FREQ_WEIGHT +
+            wordFreqScore * WORD_FREQ_WEIGHT +
+            wordLengthScore * WORD_LENGTH_WEIGHT
+        );
+        
+        return finalScore;
     }
     
     // 设置语言
@@ -720,16 +844,62 @@ document.addEventListener('DOMContentLoaded', function() {
                     resultItem.classList.add('highlighted');
                 }
                 
+                // 计算详细的可靠性评分组件
+                const detailedScore = getDetailedReliabilityScore(result.text);
+                
                 resultItem.innerHTML = `
                     <div class="result-header">
                         <div class="key-label">${translations[document.documentElement.lang]['key_label']} ${result.key}:</div>
                         <div class="score-label">${translations[document.documentElement.lang]['reliability_score']}: ${result.score}</div>
+                        <div class="score-details-toggle"><i class="fas fa-info-circle"></i></div>
                     </div>
-                    <div>${result.text}</div>
+                    <div class="score-details" style="display: none;">
+                        <div class="score-component">
+                            <span class="component-label">🔤 ${translations[document.documentElement.lang].letterFreqScore || 'Letter Frequency'}:</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: ${detailedScore.letterFreqScore}%"></div>
+                            </div>
+                            <span class="component-value">${detailedScore.letterFreqScore}</span>
+                        </div>
+                        <div class="score-component">
+                            <span class="component-label">📝 ${translations[document.documentElement.lang].wordFreqScore || 'Common Words'}:</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: ${detailedScore.wordFreqScore}%"></div>
+                            </div>
+                            <span class="component-value">${detailedScore.wordFreqScore}</span>
+                        </div>
+                        <div class="score-component">
+                            <span class="component-label">📏 ${translations[document.documentElement.lang].wordLengthScore || 'Word Length'}:</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: ${detailedScore.wordLengthScore}%"></div>
+                            </div>
+                            <span class="component-value">${detailedScore.wordLengthScore}</span>
+                        </div>
+                        <div class="common-words-found">
+                            <span>${translations[document.documentElement.lang].commonWordsFound || 'Common words found'}: ${detailedScore.commonWordsFound}</span>
+                            ${detailedScore.commonWordsFoundList && detailedScore.commonWordsFoundList.length > 0 
+                                ? `<div class="common-words-tags">
+                                    ${detailedScore.commonWordsFoundList.map(word => 
+                                        `<span class="word-tag">${word}</span>`).join('')}
+                                </div>` 
+                                : ''}
+                        </div>
+                    </div>
+                    <div class="result-text">${result.text}</div>
                 `;
                 
                 // 点击结果项应用该密钥
-                resultItem.addEventListener('click', () => {
+                resultItem.addEventListener('click', function(e) {
+                    // 如果点击的是详情切换按钮，则只显示/隐藏详情
+                    if (e.target.closest('.score-details-toggle')) {
+                        const detailsElement = this.querySelector('.score-details');
+                        if (detailsElement) {
+                            detailsElement.style.display = 
+                                detailsElement.style.display === 'none' ? 'block' : 'none';
+                        }
+                        return;
+                    }
+                    
                     // 设置密钥
                     caesarKey.value = result.key;
                     
@@ -779,6 +949,129 @@ document.addEventListener('DOMContentLoaded', function() {
         // 平滑滚动到结果区域
         bruteforceResults.scrollIntoView({ behavior: 'smooth' });
     });
+    
+    // 获取详细的可靠性评分组件
+    function getDetailedReliabilityScore(text) {
+        if (!text || text.trim().length === 0) {
+            return {
+                letterFreqScore: 0,
+                wordFreqScore: 0,
+                wordLengthScore: 0,
+                commonWordsFound: 0
+            };
+        }
+        
+        // 字母频率分析
+        const lettersOnly = text.toLowerCase().replace(/[^a-z]/g, '');
+        if (lettersOnly.length === 0) {
+            return {
+                letterFreqScore: 0,
+                wordFreqScore: 0,
+                wordLengthScore: 0,
+                commonWordsFound: 0
+            };
+        }
+        
+        const letterFreqMap = {};
+        for (let char of lettersOnly) {
+            letterFreqMap[char] = (letterFreqMap[char] || 0) + 1;
+        }
+        
+        for (let char in letterFreqMap) {
+            letterFreqMap[char] /= lettersOnly.length;
+        }
+        
+        let letterFreqScore = 0;
+        for (let char in englishLetterFreq) {
+            const observed = letterFreqMap[char] || 0;
+            const expected = englishLetterFreq[char];
+            letterFreqScore += Math.pow(observed - expected, 2);
+        }
+        
+        letterFreqScore = Math.sqrt(letterFreqScore);
+        // 转换为0-100分 (越高越匹配)
+        letterFreqScore = Math.max(0, Math.min(100, Math.round((1 - letterFreqScore) * 100)));
+        
+        // 常用词频率分析
+        const words = text.toLowerCase().match(/[a-z]+/g) || [];
+        if (words.length === 0) {
+            return {
+                letterFreqScore,
+                wordFreqScore: 0,
+                wordLengthScore: 0,
+                commonWordsFound: 0
+            };
+        }
+        
+        const wordFreqMap = {};
+        const totalWords = words.length;
+        
+        for (let word of words) {
+            wordFreqMap[word] = (wordFreqMap[word] || 0) + 1;
+        }
+        
+        for (let word in wordFreqMap) {
+            wordFreqMap[word] /= totalWords;
+        }
+        
+        let wordFreqScore = 0;
+        let commonWordsFound = 0;
+        let commonWordsFoundList = [];
+        
+        for (let word in englishCommonWords) {
+            if (wordFreqMap[word]) {
+                const observed = wordFreqMap[word];
+                const expected = englishCommonWords[word];
+                
+                wordFreqScore += Math.pow(observed - expected, 2) * (1 - expected);
+                commonWordsFound++;
+                commonWordsFoundList.push(word);
+            }
+        }
+        
+        if (commonWordsFound > 0) {
+            wordFreqScore = wordFreqScore / commonWordsFound;
+            const coverageBonus = Math.min(1, commonWordsFound / 15); 
+            wordFreqScore = Math.max(0, Math.min(100, Math.round((1 - wordFreqScore) * 100 * (0.5 + 0.5 * coverageBonus))));
+        } else {
+            wordFreqScore = 0;
+        }
+        
+        // 单词长度分布分析
+        const wordLengthMap = {};
+        let totalLength = 0;
+        
+        words.forEach(word => {
+            const length = Math.min(15, word.length);
+            wordLengthMap[length] = (wordLengthMap[length] || 0) + 1;
+            totalLength += length;
+        });
+        
+        for (let length in wordLengthMap) {
+            wordLengthMap[length] /= words.length;
+        }
+        
+        let wordLengthScore = 0;
+        for (let length in englishWordLengthFreq) {
+            const observed = wordLengthMap[length] || 0;
+            const expected = englishWordLengthFreq[length];
+            wordLengthScore += Math.pow(observed - expected, 2);
+        }
+        
+        const avgLength = totalLength / words.length;
+        const avgLengthDiff = Math.abs(avgLength - 4.79) / 4.79;
+        
+        wordLengthScore = Math.sqrt(wordLengthScore) + avgLengthDiff;
+        wordLengthScore = Math.max(0, Math.min(100, Math.round((1 - wordLengthScore) * 100)));
+        
+        return {
+            letterFreqScore,
+            wordFreqScore,
+            wordLengthScore,
+            commonWordsFound,
+            commonWordsFoundList
+        };
+    }
     
     // 栅栏密码功能
     const railfenceInput = document.getElementById('railfence-input');

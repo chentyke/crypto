@@ -1342,4 +1342,130 @@ footer {
 
 textarea.highlight-input {
     animation: inputHighlight 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 增强的可靠性评分 UI 样式 */
+.score-details-toggle {
+    cursor: pointer;
+    margin-left: 8px;
+    color: #6c757d;
+    transition: color 0.2s ease;
+}
+
+.score-details-toggle:hover {
+    color: #0056b3;
+}
+
+.score-details {
+    background-color: rgba(240, 248, 255, 0.9);
+    border-radius: 6px;
+    padding: 10px;
+    margin: 8px 0;
+    border-left: 3px solid #0d6efd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.score-component {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.component-label {
+    min-width: 130px;
+    margin-right: 10px;
+    font-size: 0.85rem;
+    color: #495057;
+}
+
+.progress-bar {
+    flex-grow: 1;
+    height: 8px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0 10px;
+}
+
+.progress {
+    height: 100%;
+    background-color: #0d6efd;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.component-value {
+    min-width: 30px;
+    text-align: right;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #0d6efd;
+}
+
+.common-words-found {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: #6c757d;
+    border-top: 1px dashed #dee2e6;
+    padding-top: 6px;
+}
+
+.common-words-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.word-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    background-color: #e9f5ff;
+    color: #0d6efd;
+    border: 1px solid #c5e1ff;
+}
+
+/* 结果项调整 */
+.result-item {
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+.result-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.key-label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.score-label {
+    color: #0d6efd;
+    font-weight: 500;
+}
+
+.result-text {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    border-left: 3px solid #6c757d;
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* 高亮结果项 */
+.result-item.highlighted .result-text {
+    background-color: #fff8e6;
+    border-left-color: #ffc107;
+}
+
+.result-item:hover .result-text {
+    background-color: #f0f6ff;
+    border-left-color: #0d6efd;
 } 
