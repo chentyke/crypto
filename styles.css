@@ -39,6 +39,8 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -447,17 +449,34 @@ button:active {
 }
 
 .copy-btn {
-    background: none;
-    border: none;
-    color: var(--text-light);
-    padding: 5px;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    border: 1px solid var(--border-input);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.copy-btn i {
+    margin-right: 5px;
+    font-size: 1rem;
 }
 
 .copy-btn:hover {
-    color: var(--primary-color);
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.copy-btn:active {
     transform: translateY(0);
-    box-shadow: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .output {
@@ -483,38 +502,47 @@ button:active {
     100% { background-color: var(--bg-white); }
 }
 
+/* 暴力破解结果样式 */
 .bruteforce-results {
     display: none;
+    margin-top: 30px;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-light);
+    transition: all 0.3s ease;
 }
 
 .bruteforce-results.show {
     display: block;
-    animation: slideDown 0.5s ease;
+    animation: fadeIn 0.5s ease;
 }
 
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+.bruteforce-results h3 {
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
 }
 
 .results-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 15px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 10px;
 }
 
 .result-item {
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 6px;
     background-color: var(--bg-white);
     border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 10px;
-    transition: all 0.3s ease;
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .result-item:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px var(--shadow-color);
+    box-shadow: 0 4px 10px var(--shadow-color);
 }
 
 .result-item.highlighted {
@@ -522,10 +550,55 @@ button:active {
     background-color: var(--primary-light);
 }
 
-.key-label {
-    font-weight: 600;
+/* 添加排序控制和可靠性评分样式 */
+.sort-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.sort-btn {
+    padding: 8px 15px;
+    background-color: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.sort-btn:hover {
+    background-color: var(--primary-light);
     color: var(--primary-color);
-    margin-bottom: 5px;
+}
+
+.sort-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.key-label {
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+.score-label {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    background-color: rgba(102, 88, 211, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid rgba(102, 88, 211, 0.2);
 }
 
 /* 栅栏可视化 */
@@ -722,6 +795,17 @@ footer {
 @media (max-width: 768px) {
     .actions {
         flex-direction: column;
+        gap: 10px;
+        position: relative;
+    }
+    
+    .swap-btn {
+        margin-left: 0;
+        width: 100% !important;
+        height: auto;
+        order: -1;
+        padding: 10px 15px;
+        background-color: var(--bg-light);
     }
     
     .results-container {
@@ -730,14 +814,20 @@ footer {
     
     .container {
         border-radius: 8px;
+        max-width: 100%;
+        margin: 0;
     }
     
     header {
-        padding: 20px;
+        padding: 20px 15px;
     }
     
     header h1 {
-        font-size: 2rem;
+        font-size: 1.8rem;
+    }
+
+    header p {
+        font-size: 1rem;
     }
 
     .theme-switch-wrapper {
@@ -754,13 +844,52 @@ footer {
     }
     
     .tab-btn {
-        padding: 12px 15px;
+        padding: 12px 10px;
         font-size: 0.9rem;
+        flex-grow: 1;
+        text-align: center;
+    }
+
+    .tab-btn i {
+        margin-right: 4px;
+    }
+
+    .input-section, .output-section {
+        padding: 15px;
+    }
+
+    textarea {
+        min-height: 120px;
+    }
+
+    button {
+        padding: 10px 15px;
+        width: 100%;
+        font-size: 0.95rem;
+    }
+
+    .input-with-buttons {
+        width: 100%;
+    }
+
+    input[type="number"] {
+        padding: 10px;
+        font-size: 1rem;
+    }
+
+    .key-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
     }
 
     footer {
         flex-direction: column;
         gap: 10px;
+        padding: 15px;
     }
     
     .rail-cell {
@@ -768,4 +897,182 @@ footer {
         height: 25px;
         font-size: 0.8rem;
     }
+
+    .history-item {
+        padding: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .history-actions {
+        margin-top: 10px;
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    /* 提高滚动的流畅度 */
+    body {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* 提升表单元素的可用性 */
+    input, textarea, select, button {
+        -webkit-tap-highlight-color: transparent; /* 移除iOS默认的点击高亮 */
+    }
+
+    /* 触摸反馈效果 */
+    .tab-btn:active, button:active, .icon-btn:active, .key-btn:active {
+        transform: scale(0.95);
+        transition: transform 0.1s;
+    }
+
+    /* 提高点击区域 */
+    .tab-btn, .icon-btn, .key-btn, .copy-btn, .history-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* 移动端专用的滚动容器优化 */
+    .history-container, .results-container {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+
+    /* 优化长文本输入框 */
+    textarea {
+        transition: height 0.2s ease;
+    }
+
+    /* 消除触摸时的蓝色边框 */
+    a, button, input, textarea {
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+    }
+
+    /* 优化固定位置元素 */
+    .notification {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+}
+
+/* 添加反转按钮样式 */
+.swap-btn {
+    background-color: var(--bg-white);
+    color: var(--text-light);
+    border: 1px solid var(--border-input);
+    margin-left: auto;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    transition: all var(--transition-speed) ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.swap-btn i {
+    font-size: 1rem;
+    line-height: 1;
+    margin: 0;
+}
+
+.swap-btn:hover {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.swap-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+/* 额外添加针对更小屏幕的优化 */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        border-radius: 6px;
+    }
+
+    header h1 {
+        font-size: 1.6rem;
+    }
+
+    header p {
+        font-size: 0.9rem;
+    }
+
+    .tab-btn {
+        padding: 10px 5px;
+        font-size: 0.8rem;
+    }
+
+    h2 {
+        font-size: 1.4rem;
+        margin-bottom: 15px;
+    }
+
+    h3 {
+        font-size: 1.1rem;
+    }
+
+    label {
+        font-size: 0.9rem;
+    }
+
+    .character-count {
+        font-size: 0.8rem;
+    }
+
+    .output {
+        font-size: 0.9rem;
+        padding: 12px;
+    }
+
+    .notification {
+        width: 90%;
+        left: 5%;
+        padding: 10px;
+    }
+
+    /* 优化按钮的触摸区域 */
+    .icon-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    /* 扩大表单元素的触摸区域 */
+    .key-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    /* 优化历史记录显示 */
+    .history-text {
+        max-width: 100%;
+        font-size: 0.9rem;
+    }
+
+    .rail-cell {
+        width: 20px;
+        height: 20px;
+        font-size: 0.7rem;
+    }
+}
+
+/* 输入高亮动画效果 */
+@keyframes inputHighlight {
+    0% { box-shadow: 0 0 0 0 rgba(102, 88, 211, 0); border-color: var(--border-input); }
+    50% { box-shadow: 0 0 0 4px rgba(102, 88, 211, 0.2); border-color: var(--primary-color); }
+    100% { box-shadow: 0 0 0 0 rgba(102, 88, 211, 0); border-color: var(--border-input); }
+}
+
+textarea.highlight-input {
+    animation: inputHighlight 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 } 

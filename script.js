@@ -2,6 +2,70 @@ document.addEventListener('DOMContentLoaded', function() {
     // 语言切换功能
     const langToggle = document.getElementById('lang-toggle');
     const langSwitchWrapper = document.querySelector('.lang-switch-wrapper');
+    
+    // 移动端检测和优化
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    if (isMobile) {
+        // 添加触屏设备的交互优化
+        enhanceMobileExperience();
+    }
+    
+    // 窗口大小变化监听
+    window.addEventListener('resize', function() {
+        const isMobileNow = window.matchMedia('(max-width: 768px)').matches;
+        if (isMobileNow) {
+            enhanceMobileExperience();
+        }
+    });
+    
+    // 移动端交互优化函数
+    function enhanceMobileExperience() {
+        // 增加触摸反馈
+        const allButtons = document.querySelectorAll('button');
+        allButtons.forEach(button => {
+            if (!button.hasAttribute('data-touch-bound')) {
+                button.setAttribute('data-touch-bound', 'true');
+                
+                button.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.95)';
+                });
+                
+                button.addEventListener('touchend', function() {
+                    this.style.transform = 'scale(1)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 200);
+                });
+            }
+        });
+        
+        // 调整Tab页的触摸区域
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        tabButtons.forEach(tab => {
+            if (!tab.hasAttribute('data-touch-bound')) {
+                tab.setAttribute('data-touch-bound', 'true');
+                tab.style.minHeight = '44px'; // 确保触摸区域足够大
+            }
+        });
+        
+        // 自动调整文本区域的高度
+        const textareas = document.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+            if (!textarea.hasAttribute('data-touch-bound')) {
+                textarea.setAttribute('data-touch-bound', 'true');
+                
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                });
+                
+                // 初始调整
+                textarea.style.height = 'auto';
+                textarea.style.height = (textarea.scrollHeight) + 'px';
+            }
+        });
+    }
+    
     const translations = {
         'en': {
             'title': 'Classical Cipher Tools',
@@ -32,7 +96,11 @@ document.addEventListener('DOMContentLoaded', function() {
             'enter_decrypt_text': 'Please enter text to decrypt',
             'enter_bruteforce_text': 'Please enter text to brute force',
             'shift_range_error': 'Shift must be an integer between 1 and 25',
-            'rails_range_error': 'Rails must be an integer between 2 and 10'
+            'rails_range_error': 'Rails must be an integer between 2 and 10',
+            'reliability_score': 'Reliability Score',
+            'sort_by_score': 'Sort by Score',
+            'sort_by_key': 'Sort by Key',
+            'copy': 'Copy'
         },
         'zh': {
             'title': '古典密码工具',
@@ -63,9 +131,57 @@ document.addEventListener('DOMContentLoaded', function() {
             'enter_decrypt_text': '请输入要解密的文本',
             'enter_bruteforce_text': '请输入要破解的文本',
             'shift_range_error': '位移量必须是1到25之间的整数',
-            'rails_range_error': '栏数必须是2到10之间的整数'
+            'rails_range_error': '栏数必须是2到10之间的整数',
+            'reliability_score': '可靠性评分',
+            'sort_by_score': '按评分排序',
+            'sort_by_key': '按密钥排序',
+            'copy': '复制'
         }
     };
+    
+    // 添加英语字母频率数据 (基于Peter Norvig的分析)
+    const englishLetterFreq = {
+        'e': 0.1202, 't': 0.0910, 'a': 0.0812, 'o': 0.0768, 'i': 0.0731,
+        'n': 0.0695, 's': 0.0628, 'r': 0.0602, 'h': 0.0592, 'd': 0.0432,
+        'l': 0.0398, 'u': 0.0288, 'c': 0.0271, 'm': 0.0261, 'f': 0.0230,
+        'p': 0.0211, 'y': 0.0209, 'w': 0.0203, 'g': 0.0199, 'b': 0.0154,
+        'v': 0.0106, 'k': 0.0074, 'x': 0.0020, 'j': 0.0015, 'q': 0.0010,
+        'z': 0.0007
+    };
+    
+    // 计算文本的可靠性评分
+    function calculateReliabilityScore(text) {
+        // 只计算字母
+        const lettersOnly = text.toLowerCase().replace(/[^a-z]/g, '');
+        if (lettersOnly.length === 0) return 0;
+        
+        // 计算字母频率
+        const freqMap = {};
+        for (let char of lettersOnly) {
+            freqMap[char] = (freqMap[char] || 0) + 1;
+        }
+        
+        // 计算每个字母的频率
+        for (let char in freqMap) {
+            freqMap[char] /= lettersOnly.length;
+        }
+        
+        // 计算与英语字母频率的差异 (欧几里得距离的平方)
+        let score = 0;
+        for (let char in englishLetterFreq) {
+            const observed = freqMap[char] || 0;
+            const expected = englishLetterFreq[char];
+            score += Math.pow(observed - expected, 2);
+        }
+        
+        // 计算语言频率得分 (值越低越匹配英语)
+        score = Math.sqrt(score);
+        
+        // 将得分转换为0-100的范围，0表示完全不匹配，100表示完全匹配
+        const normalizedScore = Math.max(0, Math.min(100, Math.round((1 - score) * 100)));
+        
+        return normalizedScore;
+    }
     
     // 设置语言
     function setLanguage(lang) {
@@ -311,6 +427,45 @@ document.addEventListener('DOMContentLoaded', function() {
         setupTextAreaActions(container);
     });
     
+    // 加解密反转按钮功能
+    function setupSwapButton(swapButtonId, encryptButtonId, decryptButtonId) {
+        const swapButton = document.getElementById(swapButtonId);
+        const encryptButton = document.getElementById(encryptButtonId);
+        const decryptButton = document.getElementById(decryptButtonId);
+        
+        if (!swapButton || !encryptButton || !decryptButton) return;
+        
+        swapButton.addEventListener('click', function() {
+            // 获取输出内容
+            const outputId = encryptButtonId.split('-')[0] + '-output';
+            const outputElement = document.getElementById(outputId);
+            const outputText = outputElement.textContent.trim();
+            
+            // 获取输入区域
+            const inputId = encryptButtonId.split('-')[0] + '-input';
+            const inputElement = document.getElementById(inputId);
+            
+            // 如果有输出结果，将其设置到输入区域
+            if (outputText) {
+                inputElement.value = outputText;
+                // 触发输入事件以更新字符计数
+                inputElement.dispatchEvent(new Event('input'));
+                // 清空输出
+                outputElement.textContent = '';
+                
+                // 添加输入区域的高亮效果
+                inputElement.classList.add('highlight-input');
+                setTimeout(() => {
+                    inputElement.classList.remove('highlight-input');
+                }, 800);
+            }
+        });
+    }
+    
+    // 设置加解密反转按钮
+    setupSwapButton('caesar-swap', 'caesar-encrypt', 'caesar-decrypt');
+    setupSwapButton('railfence-swap', 'railfence-encrypt', 'railfence-decrypt');
+    
     // 历史记录功能
     const historySection = document.querySelector('.history-section');
     const historyContainer = document.querySelector('.history-container');
@@ -506,52 +661,93 @@ document.addEventListener('DOMContentLoaded', function() {
         
         resultsContainer.innerHTML = '';
         
+        // 添加排序控制按钮
+        const sortControls = document.createElement('div');
+        sortControls.className = 'sort-controls';
+        sortControls.innerHTML = `
+            <button class="sort-btn sort-by-score">${translations[document.documentElement.lang]['sort_by_score']}</button>
+            <button class="sort-btn sort-by-key">${translations[document.documentElement.lang]['sort_by_key']}</button>
+        `;
+        resultsContainer.appendChild(sortControls);
+        
         // 所有可能的结果
         let allResults = [];
         
         // 尝试所有可能的密钥（1-25）
         for (let key = 1; key <= 25; key++) {
             const decrypted = caesarCipher(text, 26 - key);
-            allResults.push({ key, text: decrypted });
+            const score = calculateReliabilityScore(decrypted);
+            allResults.push({ key, text: decrypted, score });
+        }
+        
+        // 默认按照评分排序
+        allResults.sort((a, b) => b.score - a.score);
+        
+        // 渲染结果
+        function renderResults() {
+            // 清除旧结果（保留排序控制按钮）
+            const sortControlsElement = resultsContainer.querySelector('.sort-controls');
+            resultsContainer.innerHTML = '';
+            resultsContainer.appendChild(sortControlsElement);
             
-            const resultItem = document.createElement('div');
-            resultItem.className = 'result-item';
-            resultItem.setAttribute('data-key', key);
-            
-            // 如果是当前选择的密钥，突出显示
-            if (parseInt(caesarKey.value) === key) {
-                resultItem.classList.add('highlighted');
-            }
-            
-            resultItem.innerHTML = `
-                <div class="key-label">${translations[document.documentElement.lang]['key_label']} ${key}:</div>
-                <div>${decrypted}</div>
-            `;
-            
-            // 点击结果项应用该密钥
-            resultItem.addEventListener('click', () => {
-                // 设置密钥
-                caesarKey.value = key;
+            allResults.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.setAttribute('data-key', result.key);
+                resultItem.setAttribute('data-score', result.score);
                 
-                // 重新显示结果突出当前选中项
-                document.querySelectorAll('.result-item').forEach(item => {
-                    if (parseInt(item.getAttribute('data-key')) === key) {
-                        item.classList.add('highlighted');
-                    } else {
-                        item.classList.remove('highlighted');
-                    }
+                // 如果是当前选择的密钥，突出显示
+                if (parseInt(caesarKey.value) === result.key) {
+                    resultItem.classList.add('highlighted');
+                }
+                
+                resultItem.innerHTML = `
+                    <div class="result-header">
+                        <div class="key-label">${translations[document.documentElement.lang]['key_label']} ${result.key}:</div>
+                        <div class="score-label">${translations[document.documentElement.lang]['reliability_score']}: ${result.score}</div>
+                    </div>
+                    <div>${result.text}</div>
+                `;
+                
+                // 点击结果项应用该密钥
+                resultItem.addEventListener('click', () => {
+                    // 设置密钥
+                    caesarKey.value = result.key;
+                    
+                    // 重新显示结果突出当前选中项
+                    document.querySelectorAll('.result-item').forEach(item => {
+                        if (parseInt(item.getAttribute('data-key')) === result.key) {
+                            item.classList.add('highlighted');
+                        } else {
+                            item.classList.remove('highlighted');
+                        }
+                    });
+                    
+                    // 更新输出
+                    caesarOutput.textContent = result.text;
+                    caesarOutput.classList.add('highlight');
+                    setTimeout(() => {
+                        caesarOutput.classList.remove('highlight');
+                    }, 1000);
                 });
                 
-                // 更新输出
-                caesarOutput.textContent = decrypted;
-                caesarOutput.classList.add('highlight');
-                setTimeout(() => {
-                    caesarOutput.classList.remove('highlight');
-                }, 1000);
+                resultsContainer.appendChild(resultItem);
             });
-            
-            resultsContainer.appendChild(resultItem);
         }
+        
+        // 渲染初始结果
+        renderResults();
+        
+        // 添加排序事件监听器
+        document.querySelector('.sort-by-score').addEventListener('click', () => {
+            allResults.sort((a, b) => b.score - a.score);
+            renderResults();
+        });
+        
+        document.querySelector('.sort-by-key').addEventListener('click', () => {
+            allResults.sort((a, b) => a.key - b.key);
+            renderResults();
+        });
         
         // 显示暴力破解结果
         bruteforceResults.classList.add('show');

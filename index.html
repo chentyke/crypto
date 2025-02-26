@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#6658d3">
     <title>Classical Cipher Tools</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -54,12 +55,13 @@
                         <button id="caesar-encrypt"><i class="fas fa-lock"></i> <span data-lang="encrypt">Encrypt</span></button>
                         <button id="caesar-decrypt"><i class="fas fa-unlock"></i> <span data-lang="decrypt">Decrypt</span></button>
                         <button id="caesar-bruteforce"><i class="fas fa-hammer"></i> <span data-lang="bruteforce">Brute Force</span></button>
+                        <button id="caesar-swap" class="swap-btn" title="Swap encrypt/decrypt"><i class="fas fa-sync-alt"></i></button>
                     </div>
                 </div>
                 <div class="output-section">
                     <div class="output-header">
                         <h3><span data-lang="result">Result:</span></h3>
-                        <button class="copy-btn" id="caesar-copy-btn" title="Copy result"><i class="fas fa-copy"></i></button>
+                        <button class="copy-btn" id="caesar-copy-btn" title="Copy result"><i class="fas fa-copy"></i> <span data-lang="copy">Copy</span></button>
                     </div>
                     <div id="caesar-output" class="output"></div>
                     
@@ -96,12 +98,13 @@
                     <div class="actions">
                         <button id="railfence-encrypt"><i class="fas fa-lock"></i> <span data-lang="encrypt">Encrypt</span></button>
                         <button id="railfence-decrypt"><i class="fas fa-unlock"></i> <span data-lang="decrypt">Decrypt</span></button>
+                        <button id="railfence-swap" class="swap-btn" title="Swap encrypt/decrypt"><i class="fas fa-sync-alt"></i></button>
                     </div>
                 </div>
                 <div class="output-section">
                     <div class="output-header">
                         <h3><span data-lang="result">Result:</span></h3>
-                        <button class="copy-btn" id="railfence-copy-btn" title="Copy result"><i class="fas fa-copy"></i></button>
+                        <button class="copy-btn" id="railfence-copy-btn" title="Copy result"><i class="fas fa-copy"></i> <span data-lang="copy">Copy</span></button>
                     </div>
                     <div id="railfence-output" class="output"></div>
                     <div id="railfence-visualization" class="visualization">
