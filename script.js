@@ -77,21 +77,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const translations = {
         'en': {
             'title': 'Classical Cipher Tools',
-            'subtitle': 'Implement encryption and decryption of Caesar cipher and Rail Fence cipher',
+            'subtitle': 'Implement encryption and decryption of Caesar cipher, Rail Fence cipher, and Monoalphabetic cipher',
             'caesar': 'Caesar Cipher',
             'railfence': 'Rail Fence Cipher',
+            'monoalpha': 'Monoalphabetic Cipher',
+            'playfair': 'Playfair Cipher',
             'input_text': 'Input Text',
             'characters': 'characters',
             'shift': 'Shift (1-25)',
             'rails': 'Rails (2-10)',
+            'key': 'Key',
+            'plaintext': 'Plaintext',
+            'ciphertext': 'Ciphertext',
+            'generate_key': 'Generate Key',
             'encrypt': 'Encrypt',
             'decrypt': 'Decrypt',
             'bruteforce': 'Brute Force',
             'result': 'Result:',
             'bruteforce_results': 'Brute Force Results:',
             'rail_visualization': 'Rail Fence Visualization:',
+            'matrix': 'Matrix',
+            'filler_char': 'Filler Character',
+            'letter_pairs': 'Letter Pairs',
             'history': 'History',
-            'footer_text': 'Caesar Cipher & Rail Fence Cipher',
+            'footer_text': 'Caesar Cipher, Rail Fence Cipher, Monoalphabetic Cipher & Playfair Cipher',
             'copied': 'Copied to clipboard',
             'click_to_close': 'Click × or outside to close',
             'empty_history': 'No history records',
@@ -104,6 +113,9 @@ document.addEventListener('DOMContentLoaded', function() {
             'enter_encrypt_text': 'Please enter text to encrypt',
             'enter_decrypt_text': 'Please enter text to decrypt',
             'enter_bruteforce_text': 'Please enter text to brute force',
+            'enter_key': 'Please enter a 26-letter key',
+            'enter_playfair_key': 'Please enter a keyword for the Playfair cipher',
+            'invalid_key': 'Key must contain all 26 letters of the alphabet (no duplicates)',
             'shift_range_error': 'Shift must be an integer between 1 and 25',
             'rails_range_error': 'Rails must be an integer between 2 and 10',
             'reliability_score': 'Reliability Score',
@@ -132,25 +144,38 @@ document.addEventListener('DOMContentLoaded', function() {
             'confirm_delete_word': 'Are you sure you want to delete this word?',
             'no_words_found': 'No words found',
             'adjust_weight': 'Adjust Weight',
-            'weight_tooltip': 'Higher weight = greater impact on reliability score'
+            'weight_tooltip': 'Higher weight = greater impact on reliability score',
+            'playfair_note': 'Note: In Playfair cipher, I and J are considered as the same letter',
+            'same_row': 'Same Row',
+            'same_column': 'Same Column',
+            'rectangle': 'Rectangle'
         },
         'zh': {
             'title': '古典密码工具',
-            'subtitle': '实现凯撒密码和栅栏密码的加解密',
+            'subtitle': '实现凯撒密码、栅栏密码和单字母替换密码的加解密',
             'caesar': '凯撒密码',
             'railfence': '栅栏密码',
+            'monoalpha': '单字母替换密码',
+            'playfair': 'Playfair密码',
             'input_text': '输入文本',
             'characters': '个字符',
             'shift': '位移量 (1-25)',
             'rails': '栏数 (2-10)',
+            'key': '密钥',
+            'plaintext': '明文',
+            'ciphertext': '密文',
+            'generate_key': '生成密钥',
             'encrypt': '加密',
             'decrypt': '解密',
             'bruteforce': '暴力破解',
             'result': '结果：',
             'bruteforce_results': '暴力破解结果：',
             'rail_visualization': '栅栏可视化：',
+            'matrix': '矩阵',
+            'filler_char': '填充字符',
+            'letter_pairs': '字母对',
             'history': '历史记录',
-            'footer_text': '凯撒密码 & 栅栏密码',
+            'footer_text': '凯撒密码, 栅栏密码, 单字母替换密码 & Playfair密码',
             'copied': '已复制到剪贴板',
             'click_to_close': '点击×或外部区域关闭',
             'empty_history': '暂无历史记录',
@@ -163,6 +188,9 @@ document.addEventListener('DOMContentLoaded', function() {
             'enter_encrypt_text': '请输入要加密的文本',
             'enter_decrypt_text': '请输入要解密的文本',
             'enter_bruteforce_text': '请输入要破解的文本',
+            'enter_key': '请输入26个字母的密钥',
+            'enter_playfair_key': '请输入Playfair密码的关键词',
+            'invalid_key': '密钥必须包含所有26个字母（不能重复）',
             'shift_range_error': '位移量必须是1到25之间的整数',
             'rails_range_error': '栏数必须是2到10之间的整数',
             'reliability_score': '可靠性评分',
@@ -191,7 +219,11 @@ document.addEventListener('DOMContentLoaded', function() {
             'confirm_delete_word': '确定要删除这个单词吗？',
             'no_words_found': '未找到单词',
             'adjust_weight': '调整权重',
-            'weight_tooltip': '权重越高 = 对可靠性评分的影响越大'
+            'weight_tooltip': '权重越高 = 对可靠性评分的影响越大',
+            'playfair_note': '注意：在Playfair密码中，I和J被视为同一个字母',
+            'same_row': '同一行',
+            'same_column': '同一列',
+            'rectangle': '矩形规则'
         }
     };
     
@@ -396,6 +428,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const typeElement = item.querySelector('.history-type');
             if (typeElement) {
                 const isCaesar = typeElement.innerHTML.includes('fa-key');
+                const isRailFence = typeElement.innerHTML.includes('fa-bars');
+                const isMonoalpha = typeElement.innerHTML.includes('fa-random');
+                const isPlayfair = typeElement.innerHTML.includes('fa-th');
                 const isEncrypt = typeElement.innerHTML.includes('加密') || typeElement.innerHTML.includes('Encrypt');
                 const isDecrypt = typeElement.innerHTML.includes('解密') || typeElement.innerHTML.includes('Decrypt');
                 const isBruteforce = typeElement.innerHTML.includes('暴力破解') || typeElement.innerHTML.includes('Brute Force');
@@ -403,8 +438,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 let newText = '';
                 if (isCaesar) {
                     newText += `<i class="fas fa-key"></i> ${translations[lang]['caesar']} `;
-                } else {
+                } else if (isRailFence) {
                     newText += `<i class="fas fa-bars"></i> ${translations[lang]['railfence']} `;
+                } else if (isMonoalpha) {
+                    newText += `<i class="fas fa-random"></i> ${translations[lang]['monoalpha']} `;
+                } else if (isPlayfair) {
+                    newText += `<i class="fas fa-th"></i> ${translations[lang]['playfair']} `;
                 }
                 
                 if (isEncrypt) {
@@ -587,8 +626,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 "hello world, this is a test message for encryption",
                 "rail fence cipher creates a zigzag pattern",
                 "cryptography is the practice of secure communication",
-                "古典密码学包括凯撒密码和栅栏密码等加密方法",
-                "计算机科学与密码学有着密切的关系",
                 "Rail fence cipher can handle numbers like 12345 and symbols !@#$%"
             ];
             
@@ -664,9 +701,19 @@ document.addEventListener('DOMContentLoaded', function() {
             historyItem.className = 'history-item';
             
             const lang = document.documentElement.lang;
-            const typeText = item.type === 'caesar' ? translations[lang]['caesar'] : translations[lang]['railfence'];
-            let operationText = '';
+            let typeText = '';
             
+            if (item.type === 'caesar') {
+                typeText = translations[lang]['caesar'];
+            } else if (item.type === 'railfence') {
+                typeText = translations[lang]['railfence'];
+            } else if (item.type === 'monoalpha') {
+                typeText = translations[lang]['monoalpha'];
+            } else if (item.type === 'playfair') {
+                typeText = translations[lang]['playfair'];
+            }
+            
+            let operationText = '';
             if (item.operation === 'encrypt') {
                 operationText = translations[lang]['encrypt'];
             } else if (item.operation === 'decrypt') {
@@ -675,10 +722,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 operationText = translations[lang]['bruteforce'];
             }
             
+            let iconClass = 'fa-key';
+            if (item.type === 'railfence') {
+                iconClass = 'fa-bars';
+            } else if (item.type === 'monoalpha') {
+                iconClass = 'fa-random';
+            } else if (item.type === 'playfair') {
+                iconClass = 'fa-th';
+            }
+            
             historyItem.innerHTML = `
                 <div class="history-info">
                     <div class="history-type">
-                        <i class="fas ${item.type === 'caesar' ? 'fa-key' : 'fa-bars'}"></i>
+                        <i class="fas ${iconClass}"></i>
                         ${typeText} ${operationText}
                     </div>
                     <div class="history-text">${item.input}</div>
@@ -708,9 +764,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 更新字符计数
                 document.getElementById(`${item.type}-char-count`).textContent = item.input.length;
                 
+                // 特殊处理Playfair
+                if (item.type === 'playfair') {
+                    updatePlayfairMatrix(item.key);
+                }
+                
                 // 如果是凯撒暴力破解，则点击暴力破解按钮
                 if (item.type === 'caesar' && item.operation === 'bruteforce') {
                     document.getElementById('caesar-bruteforce').click();
+                }
+                // 单字母替换暴力破解
+                else if (item.type === 'monoalpha' && item.operation === 'bruteforce') {
+                    document.getElementById('monoalpha-bruteforce').click();
                 }
                 // 否则点击相应的加密或解密按钮
                 else {
@@ -1746,4 +1811,1192 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 在DOMContentLoaded事件中初始化模态框
     initCommonWordsModal();
+    
+    // 单字母替换密码功能
+    const monoalphaInput = document.getElementById('monoalpha-input');
+    const monoalphaKey = document.getElementById('monoalpha-key');
+    const monoalphaOutput = document.getElementById('monoalpha-output');
+    const monoalphaEncryptBtn = document.getElementById('monoalpha-encrypt');
+    const monoalphaDecryptBtn = document.getElementById('monoalpha-decrypt');
+    const monoalphaBruteforceBtn = document.getElementById('monoalpha-bruteforce');
+    const monoalphaBruteforceResults = document.getElementById('monoalpha-bruteforce-results');
+    const monoalphaBruteforceContainer = monoalphaBruteforceResults.querySelector('.results-container');
+    const generateKeyBtn = document.getElementById('generate-key-btn');
+    const keyDisplay = document.getElementById('key-display');
+    const monoalphaCopyBtn = document.getElementById('monoalpha-copy-btn');
+    const viewCommonWordsBtnMa = document.getElementById('view-common-words-btn-ma');
+    
+    // 初始化字符计数器和按钮
+    setupCharacterCounter('monoalpha-input', 'monoalpha-char-count');
+    setupCopyButton('monoalpha-copy-btn', 'monoalpha-output');
+    setupTextAreaActions(document.querySelector('#monoalpha .input-section'));
+    setupSwapButton('monoalpha-swap', 'monoalpha-encrypt', 'monoalpha-decrypt');
+    
+    if (viewCommonWordsBtnMa) {
+        viewCommonWordsBtnMa.addEventListener('click', () => {
+            const modal = document.getElementById('common-words-modal');
+            modal.style.display = 'block';
+        });
+    }
+    
+    // 生成随机密钥
+    function generateRandomKey() {
+        const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+        const shuffled = [...alphabet];
+        
+        // Fisher-Yates 洗牌算法
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        
+        return shuffled.join('').toUpperCase();
+    }
+    
+    // 验证密钥是否有效
+    function isValidKey(key) {
+        if (!key || key.length !== 26) return false;
+        
+        // 检查是否包含所有26个字母且不重复
+        const sortedKey = key.toLowerCase().split('').sort().join('');
+        return sortedKey === 'abcdefghijklmnopqrstuvwxyz';
+    }
+    
+    // 更新密钥显示
+    function updateKeyDisplay(key) {
+        keyDisplay.textContent = key;
+    }
+    
+    // 生成随机密钥按钮
+    generateKeyBtn.addEventListener('click', () => {
+        const key = generateRandomKey();
+        monoalphaKey.value = key;
+        updateKeyDisplay(key);
+    });
+    
+    // 密钥输入变化时更新显示
+    monoalphaKey.addEventListener('input', function() {
+        // 转换为大写
+        this.value = this.value.toUpperCase();
+        // 只允许字母
+        this.value = this.value.replace(/[^A-Z]/g, '');
+        
+        updateKeyDisplay(this.value);
+    });
+    
+    // 单字母替换加密
+    function monoalphabeticEncrypt(text, key) {
+        if (!text) return '';
+        
+        // 构建加密映射
+        const plainAlphabet = 'abcdefghijklmnopqrstuvwxyz';
+        const cipherAlphabet = key.toLowerCase();
+        const encryptMap = {};
+        
+        for (let i = 0; i < 26; i++) {
+            encryptMap[plainAlphabet[i]] = cipherAlphabet[i];
+            // 同时处理大写字母
+            encryptMap[plainAlphabet[i].toUpperCase()] = cipherAlphabet[i].toUpperCase();
+        }
+        
+        // 加密文本
+        return text.split('').map(char => {
+            // 如果是字母则替换，否则保持不变
+            return encryptMap[char] || char;
+        }).join('');
+    }
+    
+    // 单字母替换解密
+    function monoalphabeticDecrypt(text, key) {
+        if (!text) return '';
+        
+        // 构建解密映射
+        const plainAlphabet = 'abcdefghijklmnopqrstuvwxyz';
+        const cipherAlphabet = key.toLowerCase();
+        const decryptMap = {};
+        
+        for (let i = 0; i < 26; i++) {
+            decryptMap[cipherAlphabet[i]] = plainAlphabet[i];
+            // 同时处理大写字母
+            decryptMap[cipherAlphabet[i].toUpperCase()] = plainAlphabet[i].toUpperCase();
+        }
+        
+        // 解密文本
+        return text.split('').map(char => {
+            // 如果是字母则替换，否则保持不变
+            return decryptMap[char] || char;
+        }).join('');
+    }
+    
+    // 加密按钮
+    monoalphaEncryptBtn.addEventListener('click', () => {
+        const text = monoalphaInput.value.trim();
+        if (!text) {
+            alert(translations[document.documentElement.lang]['enter_encrypt_text']);
+            return;
+        }
+        
+        const key = monoalphaKey.value.trim().toUpperCase();
+        if (!key) {
+            alert(translations[document.documentElement.lang]['enter_key']);
+            return;
+        }
+        
+        if (!isValidKey(key)) {
+            alert(translations[document.documentElement.lang]['invalid_key']);
+            return;
+        }
+        
+        const encrypted = monoalphabeticEncrypt(text, key);
+        monoalphaOutput.textContent = encrypted;
+        monoalphaOutput.classList.add('highlight');
+        setTimeout(() => {
+            monoalphaOutput.classList.remove('highlight');
+        }, 1000);
+        
+        // 添加到历史记录
+        addToHistory('monoalpha', 'encrypt', text, encrypted, key);
+    });
+    
+    // 解密按钮
+    monoalphaDecryptBtn.addEventListener('click', () => {
+        const text = monoalphaInput.value.trim();
+        if (!text) {
+            alert(translations[document.documentElement.lang]['enter_decrypt_text']);
+            return;
+        }
+        
+        const key = monoalphaKey.value.trim().toUpperCase();
+        if (!key) {
+            alert(translations[document.documentElement.lang]['enter_key']);
+            return;
+        }
+        
+        if (!isValidKey(key)) {
+            alert(translations[document.documentElement.lang]['invalid_key']);
+            return;
+        }
+        
+        const decrypted = monoalphabeticDecrypt(text, key);
+        monoalphaOutput.textContent = decrypted;
+        monoalphaOutput.classList.add('highlight');
+        setTimeout(() => {
+            monoalphaOutput.classList.remove('highlight');
+        }, 1000);
+        
+        // 添加到历史记录
+        addToHistory('monoalpha', 'decrypt', text, decrypted, key);
+    });
+    
+    // 初始化：生成一个默认随机密钥
+    document.addEventListener('DOMContentLoaded', function() {
+        const key = generateRandomKey();
+        monoalphaKey.value = key;
+        updateKeyDisplay(key);
+    });
+    
+    // 单字母替换暴力破解
+    monoalphaBruteforceBtn.addEventListener('click', () => {
+        const ciphertext = monoalphaInput.value.trim();
+        if (!ciphertext) {
+            alert(translations[document.documentElement.lang]['enter_bruteforce_text']);
+            return;
+        }
+        
+        monoalphaBruteforceContainer.innerHTML = '';
+        
+        // 添加排序控制按钮
+        const sortControls = document.createElement('div');
+        sortControls.className = 'sort-controls';
+        sortControls.innerHTML = `
+            <button class="sort-btn sort-by-score">${translations[document.documentElement.lang]['sort_by_score']}</button>
+        `;
+        monoalphaBruteforceContainer.appendChild(sortControls);
+        
+        // 开始暴力破解
+        const results = monoalphabeticBruteforce(ciphertext);
+        
+        // 默认按照评分排序
+        results.sort((a, b) => b.score - a.score);
+        
+        // 渲染结果
+        function renderResults() {
+            // 清除旧结果（保留排序控制按钮）
+            const sortControlsElement = monoalphaBruteforceContainer.querySelector('.sort-controls');
+            monoalphaBruteforceContainer.innerHTML = '';
+            monoalphaBruteforceContainer.appendChild(sortControlsElement);
+            
+            // 限制显示结果数量，仅显示前10个
+            const topResults = results.slice(0, 10);
+            
+            topResults.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.setAttribute('data-score', result.score);
+                
+                const plainKey = 'abcdefghijklmnopqrstuvwxyz';
+                const cipherKey = result.key;
+                
+                // 构建密钥映射的视觉表示
+                let keyMappingHTML = '<div class="key-mapping-display">';
+                keyMappingHTML += '<div class="plaintext-row"><span>Plaintext:</span> <span class="alphabet">abcdefghijklmnopqrstuvwxyz</span></div>';
+                keyMappingHTML += `<div class="ciphertext-row"><span>Ciphertext:</span> <span class="alphabet">${cipherKey}</span></div>`;
+                keyMappingHTML += '</div>';
+                
+                // 计算详细的可靠性评分组件
+                const detailedScore = result.detailedScore;
+                
+                resultItem.innerHTML = `
+                    <div class="result-header">
+                        <div class="key-label">${translations[document.documentElement.lang]['key_label']}</div>
+                        <div class="score-label">${translations[document.documentElement.lang]['reliability_score']}: ${result.score}</div>
+                        <div class="score-details-toggle"><i class="fas fa-info-circle"></i></div>
+                    </div>
+                    <div class="score-details" style="display: none;">
+                        <div class="score-component">
+                            <span class="component-label">🔤 ${translations[document.documentElement.lang].letterFreqScore || 'Letter Frequency'}:</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: ${detailedScore.letterFreqScore}%"></div>
+                            </div>
+                            <span class="component-value">${detailedScore.letterFreqScore}</span>
+                        </div>
+                        <div class="score-component">
+                            <span class="component-label">📝 ${translations[document.documentElement.lang].wordFreqScore || 'Common Words'}:</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: ${detailedScore.wordFreqScore}%"></div>
+                            </div>
+                            <span class="component-value">${detailedScore.wordFreqScore}</span>
+                        </div>
+                        <div class="common-words-found">
+                            <span>${translations[document.documentElement.lang].commonWordsFound || 'Common words found'}: ${detailedScore.commonWordsFound}</span>
+                            ${detailedScore.commonWordsFoundList && detailedScore.commonWordsFoundList.length > 0 
+                                ? `<div class="common-words-tags">
+                                    ${detailedScore.commonWordsFoundList.map(word => 
+                                        `<span class="word-tag">${word}</span>`).join('')}
+                                </div>` 
+                                : ''}
+                        </div>
+                    </div>
+                    ${keyMappingHTML}
+                    <div class="result-text">${result.text}</div>
+                    <button class="apply-key-btn">${translations[document.documentElement.lang]['apply'] || 'Apply Key'}</button>
+                `;
+                
+                // 点击结果项应用该密钥
+                const applyBtn = resultItem.querySelector('.apply-key-btn');
+                applyBtn.addEventListener('click', function() {
+                    // 设置密钥
+                    monoalphaKey.value = result.key.toUpperCase();
+                    updateKeyDisplay(result.key.toUpperCase());
+                    
+                    // 更新输出
+                    monoalphaOutput.textContent = result.text;
+                    monoalphaOutput.classList.add('highlight');
+                    setTimeout(() => {
+                        monoalphaOutput.classList.remove('highlight');
+                    }, 1000);
+                    
+                    // 隐藏暴力破解结果
+                    monoalphaBruteforceResults.classList.remove('show');
+                });
+                
+                // 处理详情切换
+                const detailsToggle = resultItem.querySelector('.score-details-toggle');
+                const detailsElement = resultItem.querySelector('.score-details');
+                
+                detailsToggle.addEventListener('click', function() {
+                    if (detailsElement.style.display === 'none') {
+                        detailsElement.style.display = 'block';
+                    } else {
+                        detailsElement.style.display = 'none';
+                    }
+                });
+                
+                monoalphaBruteforceContainer.appendChild(resultItem);
+            });
+        }
+        
+        // 渲染初始结果
+        renderResults();
+        
+        // 添加排序事件监听器
+        document.querySelector('#monoalpha-bruteforce-results .sort-by-score').addEventListener('click', () => {
+            results.sort((a, b) => b.score - a.score);
+            renderResults();
+        });
+        
+        // 显示暴力破解结果
+        monoalphaBruteforceResults.classList.add('show');
+        
+        // 添加到历史记录，使用得分最高的结果
+        if (results.length > 0) {
+            const bestResult = results[0];
+            addToHistory('monoalpha', 'bruteforce', ciphertext, bestResult.text, bestResult.key.toUpperCase());
+        }
+        
+        // 平滑滚动到结果区域
+        monoalphaBruteforceResults.scrollIntoView({ behavior: 'smooth' });
+    });
+    
+    // 单字母替换暴力破解算法（增强版）
+    function monoalphabeticBruteforce(ciphertext) {
+        // 1. 字母频率分析
+        const letterFrequency = analyzeLetterFrequency(ciphertext);
+        
+        // 2. 英语字母频率（已按频率从高到低排序）
+        const englishLetterFreqSorted = [
+            'e', 't', 'a', 'o', 'i', 'n', 's', 'r', 'h', 'l', 'd', 
+            'c', 'u', 'm', 'f', 'p', 'g', 'w', 'y', 'b', 'v', 'k', 
+            'x', 'j', 'q', 'z'
+        ];
+        
+        // 3. 英语常见二元组频率 (digraphs)
+        const commonDigraphs = [
+            'th', 'he', 'in', 'er', 'an', 're', 'on', 'at', 'en', 'nd', 
+            'ti', 'es', 'or', 'te', 'of', 'ed', 'is', 'it', 'al', 'ar', 
+            'st', 'to', 'nt', 'ng', 'se', 'ha', 'as', 'ou', 'io', 'le'
+        ];
+        
+        // 4. 生成多种可能的初始密钥
+        let possibleKeys = generatePossibleKeys(letterFrequency, englishLetterFreqSorted);
+        
+        // 5. 运行一次初始解密和评分
+        let results = [];
+        
+        for (const key of possibleKeys) {
+            const decrypted = monoalphabeticDecrypt(ciphertext, key);
+            const scoreDetails = getDetailedReliabilityScore(decrypted);
+            const score = calculateCombinedScore(decrypted, scoreDetails);
+            
+            results.push({
+                key,
+                text: decrypted,
+                score,
+                detailedScore: scoreDetails
+            });
+        }
+        
+        // 对最有希望的前N个密钥使用爬山算法进行优化
+        results.sort((a, b) => b.score - a.score);
+        const topCandidates = results.slice(0, 5); // 只取前5个最有希望的结果
+        
+        // 对每个有希望的密钥应用爬山算法
+        for (const candidate of topCandidates) {
+            const optimizedResult = hillClimbOptimize(ciphertext, candidate.key, commonDigraphs);
+            results.push(optimizedResult);
+        }
+        
+        // 再次排序并返回所有结果
+        results.sort((a, b) => b.score - a.score);
+        
+        return results;
+    }
+    
+    // 计算综合评分
+    function calculateCombinedScore(text, scoreDetails) {
+        // 字母频率分析权重
+        const LETTER_FREQ_WEIGHT = 0.3;
+        // 常用词频率分析权重
+        const WORD_FREQ_WEIGHT = 0.7;
+        
+        // 如果有常用词，给予额外加分
+        let bonus = 0;
+        if (scoreDetails.commonWordsFound > 0) {
+            bonus = Math.min(10, scoreDetails.commonWordsFound * 2); // 每个常用词加2分，最多10分
+        }
+        
+        const score = Math.round(
+            scoreDetails.letterFreqScore * LETTER_FREQ_WEIGHT + 
+            scoreDetails.wordFreqScore * WORD_FREQ_WEIGHT + 
+            bonus
+        );
+        
+        return Math.min(100, score); // 确保分数不超过100
+    }
+    
+    // 爬山算法优化
+    function hillClimbOptimize(ciphertext, initialKey, commonDigraphs) {
+        let currentKey = initialKey;
+        let bestKey = initialKey;
+        let bestScore = 0;
+        
+        // 获取当前密钥的解密文本和评分
+        const initialDecrypted = monoalphabeticDecrypt(ciphertext, currentKey);
+        const initialScoreDetails = getDetailedReliabilityScore(initialDecrypted);
+        let currentScore = calculateCombinedScore(initialDecrypted, initialScoreDetails);
+        bestScore = currentScore;
+        
+        // 爬山算法迭代次数
+        const maxIterations = 100;
+        let iterations = 0;
+        let noImprovementCount = 0;
+        
+        while (iterations < maxIterations && noImprovementCount < 15) {
+            let improved = false;
+            
+            // 尝试交换密钥中的两个字符
+            for (let i = 0; i < 26 && !improved; i++) {
+                for (let j = i + 1; j < 26 && !improved; j++) {
+                    // 创建新的密钥，交换两个字符
+                    const newKey = swapCharactersInKey(currentKey, i, j);
+                    
+                    // 解密并评分
+                    const decrypted = monoalphabeticDecrypt(ciphertext, newKey);
+                    const scoreDetails = getDetailedReliabilityScore(decrypted);
+                    const score = calculateCombinedScore(decrypted, scoreDetails);
+                    
+                    // 如果新的密钥更好，更新当前密钥
+                    if (score > currentScore) {
+                        currentKey = newKey;
+                        currentScore = score;
+                        improved = true;
+                        
+                        // 如果这是迄今为止最好的密钥，保存它
+                        if (score > bestScore) {
+                            bestKey = newKey;
+                            bestScore = score;
+                            noImprovementCount = 0;
+                        }
+                    }
+                }
+            }
+            
+            // 如果找不到改进，尝试更加激进的变化
+            if (!improved) {
+                // 尝试使用常见二元组优化
+                const digraphOptimizedKey = optimizeForDigraphs(ciphertext, currentKey, commonDigraphs);
+                const digraphDecrypted = monoalphabeticDecrypt(ciphertext, digraphOptimizedKey);
+                const digraphScoreDetails = getDetailedReliabilityScore(digraphDecrypted);
+                const digraphScore = calculateCombinedScore(digraphDecrypted, digraphScoreDetails);
+                
+                if (digraphScore > currentScore) {
+                    currentKey = digraphOptimizedKey;
+                    currentScore = digraphScore;
+                    
+                    if (digraphScore > bestScore) {
+                        bestKey = digraphOptimizedKey;
+                        bestScore = digraphScore;
+                        noImprovementCount = 0;
+                    }
+                } else {
+                    noImprovementCount++;
+                }
+            }
+            
+            iterations++;
+        }
+        
+        // 使用最佳密钥解密
+        const finalDecrypted = monoalphabeticDecrypt(ciphertext, bestKey);
+        const finalScoreDetails = getDetailedReliabilityScore(finalDecrypted);
+        
+        return {
+            key: bestKey,
+            text: finalDecrypted,
+            score: bestScore,
+            detailedScore: finalScoreDetails,
+            iterations: iterations
+        };
+    }
+    
+    // 交换密钥中的两个字符
+    function swapCharactersInKey(key, i, j) {
+        const keyArray = key.split('');
+        [keyArray[i], keyArray[j]] = [keyArray[j], keyArray[i]];
+        return keyArray.join('');
+    }
+    
+    // 分析二元组并优化密钥
+    function optimizeForDigraphs(ciphertext, currentKey, commonDigraphs) {
+        // 解密当前文本
+        const decrypted = monoalphabeticDecrypt(ciphertext, currentKey);
+        
+        // 提取解密文本中的二元组
+        const digraphs = extractDigraphs(decrypted.toLowerCase());
+        
+        // 如果没有足够的二元组，则返回原密钥
+        if (Object.keys(digraphs).length < 5) {
+            return currentKey;
+        }
+        
+        // 将当前密钥转换为映射
+        const keyMap = {};
+        const plainAlphabet = 'abcdefghijklmnopqrstuvwxyz';
+        const cipherAlphabet = currentKey.toLowerCase();
+        
+        for (let i = 0; i < 26; i++) {
+            keyMap[cipherAlphabet[i]] = plainAlphabet[i];
+        }
+        
+        // 尝试改进几个最常见的二元组
+        let modifiedKey = currentKey;
+        let improvements = 0;
+        
+        // 按频率排序二元组
+        const sortedDigraphs = Object.entries(digraphs)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);  // 只考虑最常见的10个二元组
+        
+        for (const [digraph, freq] of sortedDigraphs) {
+            // 检查该二元组是否是常见英语二元组
+            if (!commonDigraphs.includes(digraph) && freq > 0.01) {
+                // 找到两个对调可能改进的字符
+                for (let i = 0; i < commonDigraphs.length && improvements < 3; i++) {
+                    const targetDigraph = commonDigraphs[i];
+                    
+                    // 如果两个字符不同，尝试一次交换
+                    if (digraph[0] !== targetDigraph[0] && digraph[1] !== targetDigraph[1]) {
+                        // 找到当前密钥中对应的两个字符
+                        const char1 = digraph[0];
+                        const char2 = digraph[1];
+                        
+                        // 找到所需的两个字符
+                        const targetChar1 = targetDigraph[0];
+                        const targetChar2 = targetDigraph[1];
+                        
+                        // 获取映射的密文字符
+                        let cipherChar1 = null;
+                        let cipherChar2 = null;
+                        let targetCipherChar1 = null;
+                        let targetCipherChar2 = null;
+                        
+                        // 查找映射
+                        for (const [c, p] of Object.entries(keyMap)) {
+                            if (p === char1) cipherChar1 = c;
+                            if (p === char2) cipherChar2 = c;
+                            if (p === targetChar1) targetCipherChar1 = c;
+                            if (p === targetChar2) targetCipherChar2 = c;
+                        }
+                        
+                        if (cipherChar1 && targetCipherChar1) {
+                            // 在密钥中交换这两个字符
+                            const idx1 = cipherAlphabet.indexOf(cipherChar1);
+                            const idx2 = cipherAlphabet.indexOf(targetCipherChar1);
+                            if (idx1 >= 0 && idx2 >= 0) {
+                                modifiedKey = swapCharactersInKey(modifiedKey, idx1, idx2);
+                                improvements++;
+                            }
+                        }
+                        
+                        // 只有在前一个交换后才考虑第二个交换
+                        if (improvements > 0 && cipherChar2 && targetCipherChar2) {
+                            const idx1 = cipherAlphabet.indexOf(cipherChar2);
+                            const idx2 = cipherAlphabet.indexOf(targetCipherChar2);
+                            if (idx1 >= 0 && idx2 >= 0) {
+                                modifiedKey = swapCharactersInKey(modifiedKey, idx1, idx2);
+                                improvements++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return modifiedKey;
+    }
+    
+    // 提取文本中的二元组
+    function extractDigraphs(text) {
+        const digraphCounts = {};
+        const lettersOnly = text.replace(/[^a-z]/g, '');
+        
+        for (let i = 0; i < lettersOnly.length - 1; i++) {
+            const digraph = lettersOnly.substring(i, i + 2);
+            digraphCounts[digraph] = (digraphCounts[digraph] || 0) + 1;
+        }
+        
+        // 转换为频率
+        const totalDigraphs = Object.values(digraphCounts).reduce((sum, count) => sum + count, 0);
+        for (const digraph in digraphCounts) {
+            digraphCounts[digraph] /= totalDigraphs;
+        }
+        
+        return digraphCounts;
+    }
+    
+    // 分析密文字母频率
+    function analyzeLetterFrequency(text) {
+        const freqMap = {};
+        const lettersOnly = text.toLowerCase().replace(/[^a-z]/g, '');
+        
+        // 统计每个字母的出现次数
+        for (const char of lettersOnly) {
+            freqMap[char] = (freqMap[char] || 0) + 1;
+        }
+        
+        // 转换为频率并按频率排序
+        const totalChars = lettersOnly.length;
+        const freqArray = [];
+        
+        for (const char in freqMap) {
+            freqArray.push({
+                char,
+                freq: freqMap[char] / totalChars
+            });
+        }
+        
+        // 按频率从高到低排序
+        freqArray.sort((a, b) => b.freq - a.freq);
+        
+        return freqArray;
+    }
+    
+    // 生成可能的密钥（增强版）
+    function generatePossibleKeys(letterFrequency, englishFreqOrder) {
+        const possibleKeys = [];
+        const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+        
+        // 1. 基于字母频率的密钥
+        const frequencyBasedKey = generateKeyFromFrequency(letterFrequency, englishFreqOrder);
+        possibleKeys.push(frequencyBasedKey);
+        
+        // 2. 修改基于频率的密钥，更改一些常见字母对
+        // 尝试常见的可能性：e-t, a-o, i-n, s-r等的交换
+        const commonPairs = [
+            [0, 1], // e-t
+            [2, 3], // a-o
+            [4, 5], // i-n
+            [6, 7], // s-r
+            [0, 2], // e-a
+            [0, 4], // e-i
+            [1, 6]  // t-s
+        ];
+        
+        // 为每一对生成一个变种密钥
+        for (const [i, j] of commonPairs) {
+            if (i < frequencyBasedKey.length && j < frequencyBasedKey.length) {
+                const modifiedKey = [...frequencyBasedKey];
+                [modifiedKey[i], modifiedKey[j]] = [modifiedKey[j], modifiedKey[i]];
+                possibleKeys.push(modifiedKey.join(''));
+            }
+        }
+        
+        // 3. 添加一些部分随机的密钥，保留不同数量的高频字母
+        for (let preserveCount = 3; preserveCount <= 7; preserveCount++) {
+            const partialRandomKey = generatePartialRandomKey(letterFrequency, englishFreqOrder, preserveCount);
+            possibleKeys.push(partialRandomKey);
+        }
+        
+        // 4. 尝试一些完全随机的密钥（增加多样性）
+        for (let i = 0; i < 3; i++) {
+            const randomKey = generateRandomKey();
+            possibleKeys.push(randomKey);
+        }
+        
+        return possibleKeys;
+    }
+    
+    // 根据频率生成密钥
+    function generateKeyFromFrequency(letterFrequency, englishFreqOrder) {
+        // 创建密钥映射
+        const keyMap = {};
+        const usedPlainChars = new Set();
+        const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+        
+        // 将密文字母频率与英语字母频率对应
+        for (let i = 0; i < letterFrequency.length; i++) {
+            const cipherChar = letterFrequency[i].char;
+            // 如果还有可用的英语字母，则映射到对应频率的英语字母
+            if (i < englishFreqOrder.length) {
+                keyMap[cipherChar] = englishFreqOrder[i];
+                usedPlainChars.add(englishFreqOrder[i]);
+            }
+        }
+        
+        // 确保所有26个字母都在映射中
+        // 为没有在密文中出现的字母分配剩余的明文字母
+        const remainingPlainChars = [...alphabet].filter(char => !usedPlainChars.has(char));
+        const allCipherChars = [...alphabet].filter(char => !Object.keys(keyMap).includes(char));
+        
+        for (let i = 0; i < allCipherChars.length && i < remainingPlainChars.length; i++) {
+            keyMap[allCipherChars[i]] = remainingPlainChars[i];
+        }
+        
+        // 构建最终密钥字符串
+        let key = '';
+        for (let i = 0; i < alphabet.length; i++) {
+            key += keyMap[alphabet[i]] || alphabet[i];
+        }
+        
+        return key;
+    }
+    
+    // 生成部分随机密钥，保留前几个高频字母
+    function generatePartialRandomKey(letterFrequency, englishFreqOrder, preserveCount = 4) {
+        // 取前N个高频字母映射
+        const keyMap = {};
+        const usedPlainChars = new Set();
+        const actualPreserveCount = Math.min(preserveCount, letterFrequency.length, englishFreqOrder.length);
+        
+        for (let i = 0; i < actualPreserveCount; i++) {
+            const cipherChar = letterFrequency[i].char;
+            keyMap[cipherChar] = englishFreqOrder[i];
+            usedPlainChars.add(englishFreqOrder[i]);
+        }
+        
+        // 其余使用随机字母
+        const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+        const remainingCipherChars = [...alphabet].filter(char => !Object.keys(keyMap).includes(char));
+        const remainingPlainChars = [...alphabet].filter(char => !usedPlainChars.has(char));
+        
+        // 打乱剩余明文字母
+        shuffleArray(remainingPlainChars);
+        
+        for (let i = 0; i < remainingCipherChars.length && i < remainingPlainChars.length; i++) {
+            keyMap[remainingCipherChars[i]] = remainingPlainChars[i];
+        }
+        
+        // 构建密钥字符串
+        let key = '';
+        for (let i = 0; i < alphabet.length; i++) {
+            key += keyMap[alphabet[i]] || alphabet[i];
+        }
+        
+        return key;
+    }
+    
+    // 辅助函数：随机打乱数组
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+    
+    // Playfair密码功能
+    const playfairInput = document.getElementById('playfair-input');
+    const playfairKey = document.getElementById('playfair-key');
+    const playfairOutput = document.getElementById('playfair-output');
+    const playfairEncryptBtn = document.getElementById('playfair-encrypt');
+    const playfairDecryptBtn = document.getElementById('playfair-decrypt');
+    const playfairMatrix = document.getElementById('playfair-matrix');
+    const playfairPairsDisplay = document.getElementById('playfair-pairs-display');
+    const playfairPairs = document.getElementById('playfair-pairs');
+    const generatePlayfairKeyBtn = document.getElementById('generate-playfair-key-btn');
+    const playfairCopyBtn = document.getElementById('playfair-copy-btn');
+    const fillerRadios = document.querySelectorAll('input[name="filler"]');
+    
+    // 初始化字符计数器和按钮
+    setupCharacterCounter('playfair-input', 'playfair-char-count');
+    setupCopyButton('playfair-copy-btn', 'playfair-output');
+    setupTextAreaActions(document.querySelector('#playfair .input-section'));
+    setupSwapButton('playfair-swap', 'playfair-encrypt', 'playfair-decrypt');
+    
+    // 生成随机Playfair密钥
+    function generateRandomPlayfairKey() {
+        const words = [
+            'SECURITY', 'CRYPTOGRAPHY', 'ENCRYPTION', 'MONARCH', 'QUANTUM', 
+            'VICTORY', 'PHOENIX', 'WHISPER', 'ENIGMA', 'PUZZLE'
+        ];
+        return words[Math.floor(Math.random() * words.length)];
+    }
+    
+    // 生成随机密钥按钮
+    generatePlayfairKeyBtn.addEventListener('click', () => {
+        const key = generateRandomPlayfairKey();
+        playfairKey.value = key;
+        updatePlayfairMatrix(key);
+    });
+    
+    // 密钥输入变化时更新矩阵
+    playfairKey.addEventListener('input', function() {
+        this.value = this.value.replace(/[^A-Za-z]/g, '').toUpperCase();
+        updatePlayfairMatrix(this.value);
+    });
+    
+    // 更新Playfair矩阵显示
+    function updatePlayfairMatrix(key) {
+        const matrix = generatePlayfairMatrix(key);
+        displayPlayfairMatrix(matrix, key);
+    }
+    
+    // 生成Playfair矩阵
+    function generatePlayfairMatrix(key) {
+        // 将I和J视为同一个字母（通常使用I）
+        const alphabet = 'ABCDEFGHIKLMNOPQRSTUVWXYZ'; // 没有J
+        
+        // 处理密钥：去重、转大写
+        key = key.toUpperCase().replace(/J/g, 'I');
+        const uniqueKey = [...new Set(key.split(''))].join('');
+        
+        // 构建矩阵
+        let matrix = uniqueKey;
+        
+        // 添加剩余字母
+        for (const char of alphabet) {
+            if (!matrix.includes(char)) {
+                matrix += char;
+            }
+        }
+        
+        // 转换为二维数组
+        const result = [];
+        for (let i = 0; i < 5; i++) {
+            result.push(matrix.substring(i * 5, (i + 1) * 5).split(''));
+        }
+        
+        return result;
+    }
+    
+    // 显示Playfair矩阵
+    function displayPlayfairMatrix(matrix, key) {
+        playfairMatrix.innerHTML = '';
+        
+        // 以集合形式存储密钥中的字符，用于高亮显示
+        const keyChars = new Set(key.toUpperCase().replace(/J/g, 'I').split(''));
+        
+        // 创建矩阵显示
+        for (let i = 0; i < 5; i++) {
+            for (let j = 0; j < 5; j++) {
+                const cell = document.createElement('div');
+                cell.className = 'matrix-cell';
+                cell.textContent = matrix[i][j];
+                cell.dataset.row = i;
+                cell.dataset.col = j;
+                
+                // 如果是密钥中的字母，高亮显示
+                if (keyChars.has(matrix[i][j])) {
+                    cell.classList.add('keyword');
+                }
+                
+                // 添加交互效果
+                cell.addEventListener('mouseenter', function() {
+                    // 高亮显示同行和同列的单元格
+                    highlightRelatedCells(i, j);
+                });
+                
+                cell.addEventListener('mouseleave', function() {
+                    // 移除高亮
+                    removeHighlights();
+                });
+                
+                playfairMatrix.appendChild(cell);
+            }
+        }
+        
+        // 添加Playfair注释
+        if (!document.querySelector('.playfair-note')) {
+            const playfairNote = document.createElement('div');
+            playfairNote.className = 'playfair-note';
+            playfairNote.textContent = translations[document.documentElement.lang]['playfair_note'] || 'Note: In Playfair cipher, I and J are considered as the same letter';
+            playfairMatrix.parentNode.appendChild(playfairNote);
+        }
+    }
+    
+    // 高亮显示相关单元格
+    function highlightRelatedCells(row, col) {
+        const cells = playfairMatrix.querySelectorAll('.matrix-cell');
+        
+        // 高亮同一行的单元格
+        for (let j = 0; j < 5; j++) {
+            if (j !== col) {
+                cells[row * 5 + j].classList.add('highlight');
+            }
+        }
+        
+        // 高亮同一列的单元格
+        for (let i = 0; i < 5; i++) {
+            if (i !== row) {
+                cells[i * 5 + col].classList.add('highlight');
+            }
+        }
+    }
+    
+    // 移除所有高亮
+    function removeHighlights() {
+        const cells = playfairMatrix.querySelectorAll('.matrix-cell');
+        cells.forEach(cell => {
+            cell.classList.remove('highlight');
+        });
+    }
+    
+    // 预处理Playfair明文
+    function preprocessPlayfairText(text, fillerChar) {
+        // 去除非字母字符，转为大写，替换J为I
+        text = text.toUpperCase().replace(/[^A-Z]/g, '').replace(/J/g, 'I');
+        
+        const pairs = [];
+        let i = 0;
+        
+        while (i < text.length) {
+            if (i === text.length - 1) {
+                // 如果只剩下一个字符，添加填充字符
+                pairs.push(text[i] + fillerChar);
+                break;
+            } else if (text[i] === text[i + 1]) {
+                // 如果两个字符相同，添加填充字符
+                pairs.push(text[i] + fillerChar);
+                i++;
+            } else {
+                // 否则，添加一对字符
+                pairs.push(text[i] + text[i + 1]);
+                i += 2;
+            }
+        }
+        
+        return pairs;
+    }
+    
+    // 找到字母在矩阵中的位置
+    function findPosition(matrix, letter) {
+        letter = letter === 'J' ? 'I' : letter;
+        
+        for (let i = 0; i < 5; i++) {
+            for (let j = 0; j < 5; j++) {
+                if (matrix[i][j] === letter) {
+                    return [i, j];
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    // Playfair加密
+    function playfairEncrypt(text, matrix, fillerChar) {
+        const pairs = preprocessPlayfairText(text, fillerChar);
+        const encryptedPairs = [];
+        
+        for (const pair of pairs) {
+            const [row1, col1] = findPosition(matrix, pair[0]);
+            const [row2, col2] = findPosition(matrix, pair[1]);
+            
+            let newPair = '';
+            
+            if (row1 === row2) {
+                // 同一行：取右侧字符(循环到第一列)
+                newPair = matrix[row1][(col1 + 1) % 5] + matrix[row2][(col2 + 1) % 5];
+            } else if (col1 === col2) {
+                // 同一列：取下方字符(循环到第一行)
+                newPair = matrix[(row1 + 1) % 5][col1] + matrix[(row2 + 1) % 5][col2];
+            } else {
+                // 不同行列：取对角字符
+                newPair = matrix[row1][col2] + matrix[row2][col1];
+            }
+            
+            encryptedPairs.push({
+                original: pair,
+                encrypted: newPair,
+                rule: row1 === row2 ? 'same-row' : (col1 === col2 ? 'same-column' : 'rectangle')
+            });
+        }
+        
+        return encryptedPairs;
+    }
+    
+    // Playfair解密
+    function playfairDecrypt(text, matrix) {
+        // 将密文分成对
+        const pairs = [];
+        for (let i = 0; i < text.length; i += 2) {
+            if (i + 1 < text.length) {
+                pairs.push(text.substring(i, i + 2));
+            }
+        }
+        
+        const decryptedPairs = [];
+        
+        for (const pair of pairs) {
+            const [row1, col1] = findPosition(matrix, pair[0]);
+            const [row2, col2] = findPosition(matrix, pair[1]);
+            
+            let newPair = '';
+            
+            if (row1 === row2) {
+                // 同一行：取左侧字符(循环到最后一列)
+                newPair = matrix[row1][(col1 + 4) % 5] + matrix[row2][(col2 + 4) % 5];
+            } else if (col1 === col2) {
+                // 同一列：取上方字符(循环到最后一行)
+                newPair = matrix[(row1 + 4) % 5][col1] + matrix[(row2 + 4) % 5][col2];
+            } else {
+                // 不同行列：取对角字符
+                newPair = matrix[row1][col2] + matrix[row2][col1];
+            }
+            
+            decryptedPairs.push({
+                original: pair,
+                decrypted: newPair,
+                rule: row1 === row2 ? 'same-row' : (col1 === col2 ? 'same-column' : 'rectangle')
+            });
+        }
+        
+        return decryptedPairs;
+    }
+    
+    // 显示字母对
+    function displayPairs(pairs, mode) {
+        playfairPairs.innerHTML = '';
+        
+        pairs.forEach(pair => {
+            const pairElement = document.createElement('div');
+            pairElement.className = 'letter-pair';
+            pairElement.setAttribute('data-rule', pair.rule);
+            
+            if (mode === 'encrypt') {
+                pairElement.innerHTML = `${pair.original} <span class="arrow">→</span> ${pair.encrypted}`;
+            } else {
+                pairElement.innerHTML = `${pair.original} <span class="arrow">→</span> ${pair.decrypted}`;
+            }
+            
+            // 添加交互效果 - 鼠标悬停时显示规则提示
+            pairElement.addEventListener('mouseenter', function() {
+                let ruleText = '';
+                if (pair.rule === 'same-row') {
+                    ruleText = translations[document.documentElement.lang]['same_row'] || 'Same Row';
+                } else if (pair.rule === 'same-column') {
+                    ruleText = translations[document.documentElement.lang]['same_column'] || 'Same Column';
+                } else {
+                    ruleText = translations[document.documentElement.lang]['rectangle'] || 'Rectangle';
+                }
+                
+                this.setAttribute('title', ruleText);
+            });
+            
+            playfairPairs.appendChild(pairElement);
+        });
+        
+        // 添加规则图例
+        const ruleLegend = document.createElement('div');
+        ruleLegend.className = 'playfair-rule-legend';
+        ruleLegend.innerHTML = `
+            <div class="rule-item">
+                <div class="rule-color same-row"></div>
+                <span>${translations[document.documentElement.lang]['same_row'] || 'Same Row'}</span>
+            </div>
+            <div class="rule-item">
+                <div class="rule-color same-column"></div>
+                <span>${translations[document.documentElement.lang]['same_column'] || 'Same Column'}</span>
+            </div>
+            <div class="rule-item">
+                <div class="rule-color rectangle"></div>
+                <span>${translations[document.documentElement.lang]['rectangle'] || 'Rectangle'}</span>
+            </div>
+        `;
+        
+        playfairPairs.appendChild(ruleLegend);
+        playfairPairsDisplay.classList.add('show');
+    }
+    
+    // 获取选中的填充字符
+    function getSelectedFillerChar() {
+        for (const radio of fillerRadios) {
+            if (radio.checked) {
+                return radio.value;
+            }
+        }
+        return 'X'; // 默认使用X
+    }
+    
+    // 加密按钮
+    playfairEncryptBtn.addEventListener('click', () => {
+        const text = playfairInput.value.trim();
+        if (!text) {
+            alert(translations[document.documentElement.lang]['enter_encrypt_text']);
+            return;
+        }
+        
+        const key = playfairKey.value.trim();
+        if (!key) {
+            alert(translations[document.documentElement.lang]['enter_playfair_key']);
+            return;
+        }
+        
+        const fillerChar = getSelectedFillerChar();
+        const matrix = generatePlayfairMatrix(key);
+        const encryptedPairs = playfairEncrypt(text, matrix, fillerChar);
+        
+        // 组合加密结果
+        const encrypted = encryptedPairs.map(pair => pair.encrypted).join('');
+        
+        playfairOutput.textContent = encrypted;
+        playfairOutput.classList.add('highlight');
+        setTimeout(() => {
+            playfairOutput.classList.remove('highlight');
+        }, 1000);
+        
+        // 显示字母对
+        displayPairs(encryptedPairs, 'encrypt');
+        
+        // 添加到历史记录
+        addToHistory('playfair', 'encrypt', text, encrypted, key);
+    });
+    
+    // 解密按钮
+    playfairDecryptBtn.addEventListener('click', () => {
+        const text = playfairInput.value.trim().toUpperCase().replace(/[^A-Z]/g, '');
+        if (!text) {
+            alert(translations[document.documentElement.lang]['enter_decrypt_text']);
+            return;
+        }
+        
+        const key = playfairKey.value.trim();
+        if (!key) {
+            alert(translations[document.documentElement.lang]['enter_playfair_key']);
+            return;
+        }
+        
+        // 验证密文长度是否为偶数
+        if (text.length % 2 !== 0) {
+            alert('Ciphertext length must be even for Playfair cipher');
+            return;
+        }
+        
+        const matrix = generatePlayfairMatrix(key);
+        const decryptedPairs = playfairDecrypt(text, matrix);
+        
+        // 组合解密结果
+        let decrypted = decryptedPairs.map(pair => pair.decrypted).join('');
+        
+        // 移除填充字符（X或Z）
+        const fillerChar = getSelectedFillerChar();
+        const otherFiller = fillerChar === 'X' ? 'Z' : 'X';
+        
+        // 首先尝试移除选择的填充字符
+        decrypted = removeFillers(decrypted, fillerChar);
+        
+        // 然后尝试移除另一个可能的填充字符
+        decrypted = removeFillers(decrypted, otherFiller);
+        
+        playfairOutput.textContent = decrypted;
+        playfairOutput.classList.add('highlight');
+        setTimeout(() => {
+            playfairOutput.classList.remove('highlight');
+        }, 1000);
+        
+        // 显示字母对
+        displayPairs(decryptedPairs, 'decrypt');
+        
+        // 添加到历史记录
+        addToHistory('playfair', 'decrypt', text, decrypted, key);
+    });
+    
+    // 移除填充字符
+    function removeFillers(text, fillerChar) {
+        let result = '';
+        
+        for (let i = 0; i < text.length; i++) {
+            // 如果是填充字符，且满足以下条件之一，则跳过：
+            // 1. 它后面跟着一个相同的字符
+            // 2. 它是文本的最后一个字符
+            // 3. 它前面有一个字符，而后面是相同的字符
+            if (text[i] === fillerChar) {
+                if (i + 1 === text.length || 
+                    (i > 0 && text[i - 1] === text[i + 1]) || 
+                    text[i - 1] === text[i + 1]) {
+                    continue;
+                }
+            }
+            result += text[i];
+        }
+        
+        return result;
+    }
+    
+    // 初始化Playfair矩阵
+    document.addEventListener('DOMContentLoaded', function() {
+        const key = generateRandomPlayfairKey();
+        playfairKey.value = key;
+        updatePlayfairMatrix(key);
+    });
 }); 

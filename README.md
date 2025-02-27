@@ -1,6 +1,6 @@
 # Classical Cipher Tool
 
-An elegant web application for implementing Caesar cipher and Rail Fence cipher encryption, decryption, and cracking functions.
+An elegant web application for implementing Caesar cipher, Rail Fence cipher, and Monoalphabetic Substitution cipher encryption, decryption, and cracking functions.
 
 ## Features
 
@@ -14,12 +14,19 @@ An elegant web application for implementing Caesar cipher and Rail Fence cipher 
 - **Decryption**: Decrypt encrypted text using a specified number of rails
 - **Visualization**: Intuitively display the encryption/decryption process of the Rail Fence cipher
 
+### Monoalphabetic Substitution Cipher
+- **Encryption**: Encrypt text using a randomly generated or custom 26-letter substitution key
+- **Decryption**: Decrypt encrypted text using the specified substitution key 
+- **Key Generation**: Generate random substitution keys with a single click
+- **Visual Mapping**: Display the plaintext-to-ciphertext letter mapping clearly
+- **Brute Force**: Attempt to crack the cipher using letter frequency analysis and common word patterns
+
 ## Usage Instructions
 
 1. Open the `index.html` file in a browser
-2. Select the desired encryption type (Caesar cipher or Rail Fence cipher)
+2. Select the desired encryption type (Caesar cipher, Rail Fence cipher, or Monoalphabetic cipher)
 3. Enter the text to be processed
-4. Set parameters (shift value or number of rails)
+4. Set parameters (shift value, number of rails, or substitution key)
 5. Click the corresponding button for encryption, decryption, or brute force cracking
 
 ## Technical Implementation
