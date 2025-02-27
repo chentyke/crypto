@@ -27,6 +27,7 @@
             <button class="tab-btn" data-tab="railfence"><i class="fas fa-bars"></i> <span data-lang="railfence">Rail Fence Cipher</span></button>
             <button class="tab-btn" data-tab="monoalpha"><i class="fas fa-random"></i> <span data-lang="monoalpha">Monoalphabetic Cipher</span></button>
             <button class="tab-btn" data-tab="playfair"><i class="fas fa-th"></i> <span data-lang="playfair">Playfair Cipher</span></button>
+            <button class="tab-btn" data-tab="vigenere"><i class="fas fa-exchange-alt"></i> <span data-lang="vigenere">Vigenère Cipher</span></button>
         </div>
 
         <div class="tab-content">
@@ -239,6 +240,62 @@
                         <h3><span data-lang="letter_pairs">Letter Pairs</span>:</h3>
                         <div id="playfair-pairs" class="pairs-container"></div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Vigenère Cipher 部分 -->
+            <div class="tab-pane" id="vigenere">
+                <div class="input-section">
+                    <h2><i class="fas fa-exchange-alt"></i> <span data-lang="vigenere">Vigenère Cipher</span></h2>
+                    <div class="form-group">
+                        <label for="vigenere-input"><span data-lang="input_text">Input Text</span>:</label>
+                        <div class="textarea-container">
+                            <textarea id="vigenere-input" placeholder="Please enter text to process..."></textarea>
+                            <div class="textarea-actions">
+                                <button class="icon-btn clear-btn" title="Clear text"><i class="fas fa-times"></i></button>
+                                <button class="icon-btn random-btn" title="Generate random text"><i class="fas fa-random"></i></button>
+                            </div>
+                        </div>
+                        <div class="character-count"><span id="vigenere-char-count">0</span> <span data-lang="characters">characters</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="vigenere-key"><span data-lang="key">Key</span>:</label>
+                        <div class="key-input-container">
+                            <input type="text" id="vigenere-key" placeholder="Enter keyword" maxlength="20">
+                            <button id="generate-vigenere-key-btn" class="generate-key-btn"><i class="fas fa-dice"></i> <span data-lang="generate_key">Generate Key</span></button>
+                        </div>
+                    </div>
+                    <div class="vigenere-key-display">
+                        <span data-lang="keyword_expansion">Keyword Expansion</span>:
+                        <div id="vigenere-expansion" class="expansion-display"></div>
+                    </div>
+                    <div class="actions">
+                        <button id="vigenere-encrypt"><i class="fas fa-lock"></i> <span data-lang="encrypt">Encrypt</span></button>
+                        <button id="vigenere-decrypt"><i class="fas fa-unlock"></i> <span data-lang="decrypt">Decrypt</span></button>
+                        <button id="vigenere-bruteforce"><i class="fas fa-hammer"></i> <span data-lang="bruteforce">Brute Force</span></button>
+                        <button id="vigenere-swap" class="swap-btn" title="Swap encrypt/decrypt"><i class="fas fa-sync-alt"></i></button>
+                    </div>
+                </div>
+                <div class="output-section">
+                    <div class="output-header">
+                        <h3><span data-lang="result">Result:</span></h3>
+                        <button class="copy-btn" id="vigenere-copy-btn" title="Copy result"><i class="fas fa-copy"></i> <span data-lang="copy">Copy</span></button>
+                    </div>
+                    <div id="vigenere-output" class="output"></div>
+                    
+                    <div id="vigenere-visualization" class="visualization">
+                        <h3><span data-lang="vigenere_visualization">Vigenère Visualization:</span></h3>
+                        <div class="vigenere-table-container"></div>
+                    </div>
+                    
+                    <div id="vigenere-bruteforce-results" class="bruteforce-results">
+                        <h3><span data-lang="bruteforce_results">Brute Force Results:</span></h3>
+                        <div class="results-container"></div>
+                    </div>
+                </div>
+                <div class="enhanced-analysis">
+                    <h3><span data-lang="enhanced_analysis">Enhanced Analysis</span></h3>
+                    <button id="view-common-words-btn-vg" class="view-dict-btn"><i class="fas fa-book"></i> <span data-lang="view_common_words">View Common Words</span></button>
                 </div>
             </div>
         </div>

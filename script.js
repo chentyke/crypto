@@ -82,6 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'railfence': 'Rail Fence Cipher',
             'monoalpha': 'Monoalphabetic Cipher',
             'playfair': 'Playfair Cipher',
+            'vigenere': 'Vigenère Cipher',
             'input_text': 'Input Text',
             'characters': 'characters',
             'shift': 'Shift (1-25)',
@@ -100,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'filler_char': 'Filler Character',
             'letter_pairs': 'Letter Pairs',
             'history': 'History',
-            'footer_text': 'Caesar Cipher, Rail Fence Cipher, Monoalphabetic Cipher & Playfair Cipher',
+            'footer_text': 'Caesar Cipher, Rail Fence Cipher, Monoalphabetic Cipher, Playfair Cipher & Vigenère Cipher',
             'copied': 'Copied to clipboard',
             'click_to_close': 'Click × or outside to close',
             'empty_history': 'No history records',
@@ -115,6 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'enter_bruteforce_text': 'Please enter text to brute force',
             'enter_key': 'Please enter a 26-letter key',
             'enter_playfair_key': 'Please enter a keyword for the Playfair cipher',
+            'enter_vigenere_key': 'Please enter a keyword for the Vigenère cipher',
             'invalid_key': 'Key must contain all 26 letters of the alphabet (no duplicates)',
             'shift_range_error': 'Shift must be an integer between 1 and 25',
             'rails_range_error': 'Rails must be an integer between 2 and 10',
@@ -148,7 +150,20 @@ document.addEventListener('DOMContentLoaded', function() {
             'playfair_note': 'Note: In Playfair cipher, I and J are considered as the same letter',
             'same_row': 'Same Row',
             'same_column': 'Same Column',
-            'rectangle': 'Rectangle'
+            'rectangle': 'Rectangle',
+            'keyword_expansion': 'Keyword Expansion',
+            'vigenere_visualization': 'Vigenère Visualization',
+            'vigenere_table': 'Vigenère Table',
+            'key_length': 'Key Length',
+            'key_period': 'Key Period',
+            'encryption_steps': 'Encryption Steps',
+            'step': 'Step',
+            'plain_char': 'Plain Character',
+            'key_char': 'Key Character',
+            'shift_value': 'Shift Value',
+            'cipher_char': 'Cipher Character',
+            'vigenere_note': 'Vigenère cipher uses multiple Caesar ciphers based on the letters of a keyword',
+            'hover_step_instruction': 'Hover over any step to highlight the corresponding cells in the table'
         },
         'zh': {
             'title': '古典密码工具',
@@ -157,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'railfence': '栅栏密码',
             'monoalpha': '单字母替换密码',
             'playfair': 'Playfair密码',
+            'vigenere': '维吉尼亚密码',
             'input_text': '输入文本',
             'characters': '个字符',
             'shift': '位移量 (1-25)',
@@ -175,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'filler_char': '填充字符',
             'letter_pairs': '字母对',
             'history': '历史记录',
-            'footer_text': '凯撒密码, 栅栏密码, 单字母替换密码 & Playfair密码',
+            'footer_text': '凯撒密码, 栅栏密码, 单字母替换密码, Playfair密码 & 维吉尼亚密码',
             'copied': '已复制到剪贴板',
             'click_to_close': '点击×或外部区域关闭',
             'empty_history': '暂无历史记录',
@@ -190,6 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'enter_bruteforce_text': '请输入要破解的文本',
             'enter_key': '请输入26个字母的密钥',
             'enter_playfair_key': '请输入Playfair密码的关键词',
+            'enter_vigenere_key': '请输入维吉尼亚密码的关键词',
             'invalid_key': '密钥必须包含所有26个字母（不能重复）',
             'shift_range_error': '位移量必须是1到25之间的整数',
             'rails_range_error': '栏数必须是2到10之间的整数',
@@ -223,7 +240,20 @@ document.addEventListener('DOMContentLoaded', function() {
             'playfair_note': '注意：在Playfair密码中，I和J被视为同一个字母',
             'same_row': '同一行',
             'same_column': '同一列',
-            'rectangle': '矩形规则'
+            'rectangle': '矩形规则',
+            'keyword_expansion': '关键词扩展',
+            'vigenere_visualization': '维吉尼亚可视化',
+            'vigenere_table': '维吉尼亚表',
+            'key_length': '密钥长度',
+            'key_period': '密钥周期',
+            'encryption_steps': '加密步骤',
+            'step': '步骤',
+            'plain_char': '明文字符',
+            'key_char': '密钥字符',
+            'shift_value': '偏移值',
+            'cipher_char': '密文字符',
+            'vigenere_note': '维吉尼亚密码基于关键词的字母使用多个凯撒密码',
+            'hover_step_instruction': '将鼠标悬停在任何步骤上以突出显示表格中的对应单元格'
         }
     };
     
@@ -2999,4 +3029,748 @@ document.addEventListener('DOMContentLoaded', function() {
         playfairKey.value = key;
         updatePlayfairMatrix(key);
     });
+    
+    // Vigenère密码功能
+    const vigenereInput = document.getElementById('vigenere-input');
+    const vigenereKey = document.getElementById('vigenere-key');
+    const vigenereOutput = document.getElementById('vigenere-output');
+    const vigenereEncryptBtn = document.getElementById('vigenere-encrypt');
+    const vigenereDecryptBtn = document.getElementById('vigenere-decrypt');
+    const vigenereBruteforceBtn = document.getElementById('vigenere-bruteforce');
+    const vigenereVisualization = document.getElementById('vigenere-visualization');
+    const vigenereTableContainer = vigenereVisualization.querySelector('.vigenere-table-container');
+    const vigenereBruteforceResults = document.getElementById('vigenere-bruteforce-results');
+    const vigenereBruteforceContainer = vigenereBruteforceResults.querySelector('.results-container');
+    const generateVigenereKeyBtn = document.getElementById('generate-vigenere-key-btn');
+    const vigenereCopyBtn = document.getElementById('vigenere-copy-btn');
+    const vigenereExpansion = document.getElementById('vigenere-expansion');
+    const viewCommonWordsBtnVg = document.getElementById('view-common-words-btn-vg');
+    
+    // 初始化字符计数器和按钮
+    setupCharacterCounter('vigenere-input', 'vigenere-char-count');
+    setupCopyButton('vigenere-copy-btn', 'vigenere-output');
+    setupTextAreaActions(document.querySelector('#vigenere .input-section'));
+    setupSwapButton('vigenere-swap', 'vigenere-encrypt', 'vigenere-decrypt');
+    
+    if (viewCommonWordsBtnVg) {
+        viewCommonWordsBtnVg.addEventListener('click', () => {
+            const modal = document.getElementById('common-words-modal');
+            modal.style.display = 'block';
+        });
+    }
+    
+    // 生成随机Vigenère密钥
+    function generateRandomVigenereKey() {
+        const keywords = [
+            'CIPHER', 'SECRET', 'ENIGMA', 'HIDDEN', 'SHADOW', 
+            'OBSCURE', 'MYSTIC', 'CRYPTIC', 'STEALTH', 'COVERT'
+        ];
+        return keywords[Math.floor(Math.random() * keywords.length)];
+    }
+    
+    // 生成随机密钥按钮
+    generateVigenereKeyBtn.addEventListener('click', () => {
+        const key = generateRandomVigenereKey();
+        vigenereKey.value = key;
+        updateVigenereKeyExpansion(key, vigenereInput.value);
+    });
+    
+    // 密钥输入变化时更新扩展
+    vigenereKey.addEventListener('input', function() {
+        this.value = this.value.replace(/[^A-Za-z]/g, '').toUpperCase();
+        updateVigenereKeyExpansion(this.value, vigenereInput.value);
+    });
+    
+    // 文本输入变化时更新扩展
+    vigenereInput.addEventListener('input', function() {
+        updateVigenereKeyExpansion(vigenereKey.value, this.value);
+    });
+    
+    // 更新Vigenère密钥扩展显示
+    function updateVigenereKeyExpansion(key, text) {
+        if (!key || !text) {
+            vigenereExpansion.innerHTML = '';
+            return;
+        }
+        
+        // 只处理字母字符
+        const plaintext = text.toUpperCase().replace(/[^A-Z]/g, '');
+        if (plaintext === '') {
+            vigenereExpansion.innerHTML = '';
+            return;
+        }
+        
+        // 密钥重复以匹配明文长度
+        const repeatedKey = key.repeat(Math.ceil(plaintext.length / key.length)).substring(0, plaintext.length);
+        
+        // 构建扩展显示
+        let keyLine = '<div class="keyword">';
+        let textLine = '<div class="plaintext">';
+        
+        for (let i = 0; i < plaintext.length; i++) {
+            keyLine += `<span class="letter key-letter">${repeatedKey[i]}</span>`;
+            textLine += `<span class="letter">${plaintext[i]}</span>`;
+        }
+        
+        keyLine += '</div>';
+        textLine += '</div>';
+        
+        vigenereExpansion.innerHTML = textLine + keyLine;
+    }
+    
+    // 创建Vigenère表格
+    function createVigenereTable() {
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const table = document.createElement('table');
+        table.className = 'vigenere-table';
+        
+        // 创建表头
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        const cornerCell = document.createElement('th');
+        cornerCell.textContent = '';
+        headerRow.appendChild(cornerCell);
+        
+        // 添加列头（A-Z）
+        for (let i = 0; i < 26; i++) {
+            const th = document.createElement('th');
+            th.textContent = alphabet[i];
+            headerRow.appendChild(th);
+        }
+        
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+        
+        // 创建表体
+        const tbody = document.createElement('tbody');
+        
+        // 添加每一行（每行是一个Caesar密码，由行标识的字母进行偏移）
+        for (let i = 0; i < 26; i++) {
+            const row = document.createElement('tr');
+            
+            // 行标识
+            const rowHeader = document.createElement('td');
+            rowHeader.textContent = alphabet[i];
+            row.appendChild(rowHeader);
+            
+            // 将字母表偏移i位
+            const shiftedAlphabet = alphabet.substring(i) + alphabet.substring(0, i);
+            
+            // 添加偏移后的字母
+            for (let j = 0; j < 26; j++) {
+                const td = document.createElement('td');
+                td.textContent = shiftedAlphabet[j];
+                td.dataset.row = i;
+                td.dataset.col = j;
+                row.appendChild(td);
+            }
+            
+            tbody.appendChild(row);
+        }
+        
+        table.appendChild(tbody);
+        return table;
+    }
+    
+    // Vigenère加密
+    function vigenereEncrypt(text, key) {
+        if (!text || !key) return '';
+        
+        // 只处理字母字符
+        const plaintext = text.replace(/[^a-zA-Z]/g, '');
+        if (plaintext === '') return '';
+        
+        // 将密钥转换为大写
+        key = key.toUpperCase();
+        
+        let encrypted = '';
+        let keyIndex = 0;
+        let encryptionSteps = [];
+        
+        for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            
+            // 只对字母进行加密
+            if (/[a-zA-Z]/.test(char)) {
+                const isUpperCase = char === char.toUpperCase();
+                const plainChar = char.toUpperCase();
+                const keyChar = key[keyIndex % key.length];
+                
+                // 计算偏移
+                const plainCode = plainChar.charCodeAt(0) - 65; // A=0, B=1, ...
+                const keyCode = keyChar.charCodeAt(0) - 65;
+                const encryptedCode = (plainCode + keyCode) % 26;
+                const encryptedChar = String.fromCharCode(encryptedCode + 65);
+                
+                // 保持原始大小写
+                encrypted += isUpperCase ? encryptedChar : encryptedChar.toLowerCase();
+                
+                // 记录加密步骤
+                encryptionSteps.push({
+                    plainChar: plainChar,
+                    keyChar: keyChar,
+                    shift: keyCode,
+                    cipherChar: encryptedChar
+                });
+                
+                // 移动到密钥的下一个字符
+                keyIndex++;
+            } else {
+                // 非字母字符保持不变
+                encrypted += char;
+            }
+        }
+        
+        return { encrypted, steps: encryptionSteps };
+    }
+    
+    // Vigenère解密
+    function vigenereDecrypt(text, key) {
+        if (!text || !key) return '';
+        
+        // 只处理字母字符
+        const ciphertext = text.replace(/[^a-zA-Z]/g, '');
+        if (ciphertext === '') return '';
+        
+        // 将密钥转换为大写
+        key = key.toUpperCase();
+        
+        let decrypted = '';
+        let keyIndex = 0;
+        let decryptionSteps = [];
+        
+        for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            
+            // 只对字母进行解密
+            if (/[a-zA-Z]/.test(char)) {
+                const isUpperCase = char === char.toUpperCase();
+                const cipherChar = char.toUpperCase();
+                const keyChar = key[keyIndex % key.length];
+                
+                // 计算偏移
+                const cipherCode = cipherChar.charCodeAt(0) - 65; // A=0, B=1, ...
+                const keyCode = keyChar.charCodeAt(0) - 65;
+                const decryptedCode = (cipherCode - keyCode + 26) % 26; // 加26确保结果为正
+                const decryptedChar = String.fromCharCode(decryptedCode + 65);
+                
+                // 保持原始大小写
+                decrypted += isUpperCase ? decryptedChar : decryptedChar.toLowerCase();
+                
+                // 记录解密步骤
+                decryptionSteps.push({
+                    cipherChar: cipherChar,
+                    keyChar: keyChar,
+                    shift: keyCode,
+                    plainChar: decryptedChar
+                });
+                
+                // 移动到密钥的下一个字符
+                keyIndex++;
+            } else {
+                // 非字母字符保持不变
+                decrypted += char;
+            }
+        }
+        
+        return { decrypted, steps: decryptionSteps };
+    }
+    
+    // 显示Vigenère加密/解密步骤的可视化
+    function displayVigenereVisualization(text, key, steps, mode) {
+        vigenereTableContainer.innerHTML = '';
+        
+        // 创建并添加Vigenère表格
+        const table = createVigenereTable();
+        vigenereTableContainer.appendChild(table);
+        
+        // 添加密钥信息
+        const keyInfo = document.createElement('div');
+        keyInfo.className = 'vigenere-key-length-info';
+        keyInfo.textContent = `${translations[document.documentElement.lang]['key_length']}: ${key.length} | ${translations[document.documentElement.lang]['key_period']}: ${key}`;
+        vigenereTableContainer.appendChild(keyInfo);
+        
+        // 添加加密/解密步骤
+        const stepsTitle = document.createElement('h3');
+        stepsTitle.textContent = translations[document.documentElement.lang]['encryption_steps'];
+        vigenereTableContainer.appendChild(stepsTitle);
+        
+        const stepsContainer = document.createElement('div');
+        stepsContainer.className = 'vigenere-steps-container';
+        
+        const maxStepsToShow = Math.min(steps.length, 10); // 显示最多10个步骤
+        
+        // 移除之前的所有高亮
+        removeAllHighlights(table);
+        
+        for (let i = 0; i < maxStepsToShow; i++) {
+            const step = steps[i];
+            const stepElement = document.createElement('div');
+            stepElement.className = 'vigenere-step';
+            
+            const stepTitle = document.createElement('div');
+            stepTitle.className = 'step-title';
+            stepTitle.textContent = `${translations[document.documentElement.lang]['step']} ${i + 1}`;
+            
+            const stepContent = document.createElement('div');
+            stepContent.className = 'step-content';
+            
+            if (mode === 'encrypt') {
+                stepContent.innerHTML = `
+                    ${translations[document.documentElement.lang]['plain_char']}: ${step.plainChar} | 
+                    ${translations[document.documentElement.lang]['key_char']}: ${step.keyChar} | 
+                    ${translations[document.documentElement.lang]['shift_value']}: ${step.shift} | 
+                    ${translations[document.documentElement.lang]['cipher_char']}: ${step.cipherChar}
+                `;
+                
+                // 突出显示Vigenère表中的相关单元格
+                // 行：由密钥字符确定，列：由明文字符确定
+                // 交叉点是加密结果
+                const rowIndex = step.keyChar.charCodeAt(0) - 65; // A=0, B=1, ...
+                const colIndex = step.plainChar.charCodeAt(0) - 65; // A=0, B=1, ...
+                
+                // 高亮显示表格中的单元格
+                highlightTableCell(table, rowIndex, colIndex);
+                
+                // 添加可交互元素，让用户能悬停在步骤上查看对应单元格
+                stepElement.addEventListener('mouseenter', function() {
+                    // 移除所有其他高亮
+                    removeAllHighlights(table);
+                    
+                    // 高亮行标题和列标题
+                    highlightRowHeader(table, rowIndex);
+                    highlightColHeader(table, colIndex);
+                    
+                    // 高亮单元格
+                    highlightTableCell(table, rowIndex, colIndex);
+                });
+                
+                stepElement.addEventListener('mouseleave', function() {
+                    // 移除所有高亮
+                    removeAllHighlights(table);
+                    
+                    // 重新高亮所有步骤的单元格
+                    for (let j = 0; j < maxStepsToShow; j++) {
+                        const s = steps[j];
+                        const ri = s.keyChar.charCodeAt(0) - 65;
+                        const ci = s.plainChar.charCodeAt(0) - 65;
+                        highlightTableCell(table, ri, ci);
+                    }
+                });
+                
+            } else {
+                stepContent.innerHTML = `
+                    ${translations[document.documentElement.lang]['cipher_char']}: ${step.cipherChar} | 
+                    ${translations[document.documentElement.lang]['key_char']}: ${step.keyChar} | 
+                    ${translations[document.documentElement.lang]['shift_value']}: ${step.shift} | 
+                    ${translations[document.documentElement.lang]['plain_char']}: ${step.plainChar}
+                `;
+                
+                // 解密时，行由密钥字符确定，列是明文字符的位置
+                const rowIndex = step.keyChar.charCodeAt(0) - 65; // 密钥字母确定行
+                
+                // 对于解密，我们需要找到包含密文字符的列
+                // 密文字符是通过将明文字符沿密钥字符对应的行移动而得到的
+                // 明文字符的列索引
+                const plainColIndex = step.plainChar.charCodeAt(0) - 65;
+                
+                // 高亮显示表格中的单元格
+                highlightTableCell(table, rowIndex, plainColIndex);
+                
+                // 添加可交互元素
+                stepElement.addEventListener('mouseenter', function() {
+                    // 移除所有其他高亮
+                    removeAllHighlights(table);
+                    
+                    // 高亮行标题和列标题
+                    highlightRowHeader(table, rowIndex);
+                    highlightColHeader(table, plainColIndex);
+                    
+                    // 高亮单元格
+                    highlightTableCell(table, rowIndex, plainColIndex);
+                });
+                
+                stepElement.addEventListener('mouseleave', function() {
+                    // 移除所有高亮
+                    removeAllHighlights(table);
+                    
+                    // 重新高亮所有步骤的单元格
+                    for (let j = 0; j < maxStepsToShow; j++) {
+                        const s = steps[j];
+                        const ri = s.keyChar.charCodeAt(0) - 65;
+                        const pi = s.plainChar.charCodeAt(0) - 65;
+                        highlightTableCell(table, ri, pi);
+                    }
+                });
+            }
+            
+            stepElement.appendChild(stepTitle);
+            stepElement.appendChild(stepContent);
+            stepsContainer.appendChild(stepElement);
+        }
+        
+        vigenereTableContainer.appendChild(stepsContainer);
+        vigenereVisualization.classList.add('show');
+        
+        // 添加Vigenère表格操作说明
+        const tableInfo = document.createElement('div');
+        tableInfo.className = 'vigenere-key-length-info';
+        tableInfo.innerHTML = `
+            <p>${translations[document.documentElement.lang]['vigenere_note'] || 'Vigenère cipher uses multiple Caesar ciphers based on the letters of a keyword'}</p>
+            <p>👆 ${translations[document.documentElement.lang]['hover_step_instruction'] || 'Hover over any step to highlight the corresponding cells in the table.'}</p>
+        `;
+        vigenereTableContainer.appendChild(tableInfo);
+    }
+    
+    // 高亮Vigenère表格中的单元格
+    function highlightTableCell(table, rowIndex, colIndex) {
+        // 确保行列索引在有效范围内
+        if (rowIndex < 0 || rowIndex > 25 || colIndex < 0 || colIndex > 25) return;
+        
+        // 表头行 + 数据行（第一行是表头，所以行索引要+2）
+        const row = table.querySelector(`tbody tr:nth-child(${rowIndex + 1})`);
+        if (!row) return;
+        
+        // 第一列是行标题，所以列索引要+1
+        const cell = row.querySelector(`td:nth-child(${colIndex + 2})`);
+        if (cell) {
+            cell.classList.add('highlighted');
+        }
+    }
+    
+    // 移除所有单元格高亮
+    function removeAllHighlights(table) {
+        const cells = table.querySelectorAll('td.highlighted, th.highlighted');
+        cells.forEach(cell => {
+            cell.classList.remove('highlighted');
+        });
+    }
+    
+    // 高亮行标题
+    function highlightRowHeader(table, rowIndex) {
+        // 确保行索引在有效范围内
+        if (rowIndex < 0 || rowIndex > 25) return;
+        
+        const row = table.querySelector(`tbody tr:nth-child(${rowIndex + 1})`);
+        if (!row) return;
+        
+        const headerCell = row.querySelector('td:first-child');
+        if (headerCell) {
+            headerCell.classList.add('highlighted');
+        }
+    }
+    
+    // 高亮列标题
+    function highlightColHeader(table, colIndex) {
+        // 确保列索引在有效范围内
+        if (colIndex < 0 || colIndex > 25) return;
+        
+        const headerRow = table.querySelector('thead tr');
+        if (!headerRow) return;
+        
+        const headerCell = headerRow.querySelector(`th:nth-child(${colIndex + 2})`);
+        if (headerCell) {
+            headerCell.classList.add('highlighted');
+        }
+    }
+    
+    // 加密按钮
+    vigenereEncryptBtn.addEventListener('click', () => {
+        const text = vigenereInput.value.trim();
+        if (!text) {
+            alert(translations[document.documentElement.lang]['enter_encrypt_text']);
+            return;
+        }
+        
+        const key = vigenereKey.value.trim();
+        if (!key) {
+            alert(translations[document.documentElement.lang]['enter_vigenere_key']);
+            return;
+        }
+        
+        const result = vigenereEncrypt(text, key);
+        vigenereOutput.textContent = result.encrypted;
+        vigenereOutput.classList.add('highlight');
+        setTimeout(() => {
+            vigenereOutput.classList.remove('highlight');
+        }, 1000);
+        
+        // 显示Vigenère可视化
+        displayVigenereVisualization(text, key, result.steps, 'encrypt');
+        
+        // 隐藏暴力破解结果
+        vigenereBruteforceResults.classList.remove('show');
+        
+        // 添加到历史记录
+        addToHistory('vigenere', 'encrypt', text, result.encrypted, key);
+    });
+    
+    // 解密按钮
+    vigenereDecryptBtn.addEventListener('click', () => {
+        const text = vigenereInput.value.trim();
+        if (!text) {
+            alert(translations[document.documentElement.lang]['enter_decrypt_text']);
+            return;
+        }
+        
+        const key = vigenereKey.value.trim();
+        if (!key) {
+            alert(translations[document.documentElement.lang]['enter_vigenere_key']);
+            return;
+        }
+        
+        const result = vigenereDecrypt(text, key);
+        vigenereOutput.textContent = result.decrypted;
+        vigenereOutput.classList.add('highlight');
+        setTimeout(() => {
+            vigenereOutput.classList.remove('highlight');
+        }, 1000);
+        
+        // 显示Vigenère可视化
+        displayVigenereVisualization(text, key, result.steps, 'decrypt');
+        
+        // 隐藏暴力破解结果
+        vigenereBruteforceResults.classList.remove('show');
+        
+        // 添加到历史记录
+        addToHistory('vigenere', 'decrypt', text, result.decrypted, key);
+    });
+    
+    // Vigenère暴力破解 - 基于频率分析的Kasiski检查
+    vigenereBruteforceBtn.addEventListener('click', () => {
+        const text = vigenereInput.value.trim();
+        if (!text) {
+            alert(translations[document.documentElement.lang]['enter_bruteforce_text']);
+            return;
+        }
+        
+        vigenereBruteforceContainer.innerHTML = '';
+        
+        // 添加排序控制按钮
+        const sortControls = document.createElement('div');
+        sortControls.className = 'sort-controls';
+        sortControls.innerHTML = `
+            <button class="sort-btn sort-by-score">${translations[document.documentElement.lang]['sort_by_score']}</button>
+            <button class="sort-btn sort-by-key">${translations[document.documentElement.lang]['sort_by_key']}</button>
+        `;
+        vigenereBruteforceContainer.appendChild(sortControls);
+        
+        // 执行暴力破解
+        const results = vigenereBreakWithKeyLengths(text);
+        
+        // 默认按照评分排序
+        results.sort((a, b) => b.score - a.score);
+        
+        // 渲染结果
+        function renderResults() {
+            // 清除旧结果（保留排序控制按钮）
+            const sortControlsElement = vigenereBruteforceContainer.querySelector('.sort-controls');
+            vigenereBruteforceContainer.innerHTML = '';
+            vigenereBruteforceContainer.appendChild(sortControlsElement);
+            
+            // 限制显示结果数量，仅显示前10个
+            const topResults = results.slice(0, 10);
+            
+            topResults.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.setAttribute('data-score', result.score);
+                resultItem.setAttribute('data-key', result.key);
+                
+                // 计算详细的可靠性评分组件
+                const detailedScore = getDetailedReliabilityScore(result.text);
+                
+                resultItem.innerHTML = `
+                    <div class="result-header">
+                        <div class="key-label">${translations[document.documentElement.lang]['key_label']}: ${result.key}</div>
+                        <div class="score-label">${translations[document.documentElement.lang]['reliability_score']}: ${result.score}</div>
+                        <div class="score-details-toggle"><i class="fas fa-info-circle"></i></div>
+                    </div>
+                    <div class="score-details" style="display: none;">
+                        <div class="score-component">
+                            <span class="component-label">🔤 ${translations[document.documentElement.lang].letterFreqScore || 'Letter Frequency'}:</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: ${detailedScore.letterFreqScore}%"></div>
+                            </div>
+                            <span class="component-value">${detailedScore.letterFreqScore}</span>
+                        </div>
+                        <div class="score-component">
+                            <span class="component-label">📝 ${translations[document.documentElement.lang].wordFreqScore || 'Common Words'}:</span>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: ${detailedScore.wordFreqScore}%"></div>
+                            </div>
+                            <span class="component-value">${detailedScore.wordFreqScore}</span>
+                        </div>
+                        <div class="common-words-found">
+                            <span>${translations[document.documentElement.lang].commonWordsFound || 'Common words found'}: ${detailedScore.commonWordsFound}</span>
+                            ${detailedScore.commonWordsFoundList && detailedScore.commonWordsFoundList.length > 0 
+                                ? `<div class="common-words-tags">
+                                    ${detailedScore.commonWordsFoundList.map(word => 
+                                        `<span class="word-tag">${word}</span>`).join('')}
+                                </div>` 
+                                : ''}
+                        </div>
+                    </div>
+                    <div class="result-text">${result.text}</div>
+                    <button class="apply-key-btn">${translations[document.documentElement.lang]['apply'] || 'Apply Key'}</button>
+                `;
+                
+                // 点击结果项应用该密钥
+                const applyBtn = resultItem.querySelector('.apply-key-btn');
+                applyBtn.addEventListener('click', function() {
+                    // 设置密钥
+                    vigenereKey.value = result.key;
+                    updateVigenereKeyExpansion(result.key, text);
+                    
+                    // 更新输出
+                    vigenereOutput.textContent = result.text;
+                    vigenereOutput.classList.add('highlight');
+                    setTimeout(() => {
+                        vigenereOutput.classList.remove('highlight');
+                    }, 1000);
+                    
+                    // 隐藏暴力破解结果
+                    vigenereBruteforceResults.classList.remove('show');
+                });
+                
+                // 处理详情切换
+                const detailsToggle = resultItem.querySelector('.score-details-toggle');
+                const detailsElement = resultItem.querySelector('.score-details');
+                
+                detailsToggle.addEventListener('click', function() {
+                    if (detailsElement.style.display === 'none') {
+                        detailsElement.style.display = 'block';
+                    } else {
+                        detailsElement.style.display = 'none';
+                    }
+                });
+                
+                vigenereBruteforceContainer.appendChild(resultItem);
+            });
+        }
+        
+        // 渲染初始结果
+        renderResults();
+        
+        // 添加排序事件监听器
+        document.querySelector('#vigenere-bruteforce-results .sort-by-score').addEventListener('click', () => {
+            results.sort((a, b) => b.score - a.score);
+            renderResults();
+        });
+        
+        document.querySelector('#vigenere-bruteforce-results .sort-by-key').addEventListener('click', () => {
+            results.sort((a, b) => a.key.length - b.key.length || a.key.localeCompare(b.key));
+            renderResults();
+        });
+        
+        // 显示暴力破解结果
+        vigenereBruteforceResults.classList.add('show');
+        vigenereVisualization.classList.remove('show');
+        
+        // 添加到历史记录，使用得分最高的结果
+        if (results.length > 0) {
+            const bestResult = results[0];
+            addToHistory('vigenere', 'bruteforce', text, bestResult.text, bestResult.key);
+        }
+        
+        // 平滑滚动到结果区域
+        vigenereBruteforceResults.scrollIntoView({ behavior: 'smooth' });
+    });
+    
+    // Vigenère破解 - 尝试多个密钥长度
+    function vigenereBreakWithKeyLengths(text) {
+        const results = [];
+        
+        // 尝试密钥长度从2到8
+        for (let keyLength = 2; keyLength <= 8; keyLength++) {
+            const likelyKeys = findLikelyVigenereKey(text, keyLength);
+            
+            // 对每个可能的密钥尝试解密并评分
+            for (const key of likelyKeys) {
+                const decrypted = vigenereDecrypt(text, key).decrypted;
+                const score = calculateReliabilityScore(decrypted);
+                
+                results.push({
+                    key,
+                    text: decrypted,
+                    score,
+                    keyLength
+                });
+            }
+        }
+        
+        return results;
+    }
+    
+    // 基于频率分析找到可能的Vigenère密钥
+    function findLikelyVigenereKey(text, keyLength) {
+        // 仅保留字母字符
+        const lettersOnly = text.toUpperCase().replace(/[^A-Z]/g, '');
+        
+        // 分组字母，每组包含在相同位置使用相同密钥字母加密的字符
+        const groups = [];
+        for (let i = 0; i < keyLength; i++) {
+            groups.push('');
+        }
+        
+        for (let i = 0; i < lettersOnly.length; i++) {
+            groups[i % keyLength] += lettersOnly[i];
+        }
+        
+        // 对每组进行频率分析，猜测每个位置的密钥字母
+        const keyGuesses = [];
+        const englishFreqOrder = 'ETAOINSRHDLUCMFYWGPBVKXQJZ';
+        
+        for (const group of groups) {
+            // 计算频率
+            const frequencies = new Array(26).fill(0);
+            for (const char of group) {
+                frequencies[char.charCodeAt(0) - 65]++;
+            }
+            
+            // 归一化
+            for (let i = 0; i < 26; i++) {
+                frequencies[i] /= group.length;
+            }
+            
+            // 按频率排序
+            const sortedIndices = [...Array(26).keys()].sort((a, b) => frequencies[b] - frequencies[a]);
+            
+            // 尝试最有可能的三个偏移
+            const possibleShifts = [];
+            for (let i = 0; i < 3; i++) {
+                // 计算这个字母和英语中最频繁字母'E'的偏移
+                // 假设这个高频字母对应英语中的'E', 'T', 'A'等
+                const offset = (sortedIndices[i] - (englishFreqOrder.charCodeAt(i) - 65) + 26) % 26;
+                possibleShifts.push(offset);
+            }
+            
+            keyGuesses.push(possibleShifts);
+        }
+        
+        // 生成所有可能的密钥组合（限制在前几个最有可能的组合）
+        const keys = generateKeyPermutations(keyGuesses, 0, '', []);
+        return keys.slice(0, 5); // 只返回前5个最可能的密钥
+    }
+    
+    // 生成密钥排列组合
+    function generateKeyPermutations(keyGuesses, index, currentKey, result) {
+        if (index === keyGuesses.length) {
+            result.push(currentKey);
+            return result;
+        }
+        
+        // 对当前位置，尝试所有可能的字母
+        for (const shift of keyGuesses[index]) {
+            const keyChar = String.fromCharCode(shift + 65);
+            generateKeyPermutations(keyGuesses, index + 1, currentKey + keyChar, result);
+        }
+        
+        return result;
+    }
+    
+    // 初始化：当页面加载时生成一个随机Vigenère密钥
+    const key = generateRandomVigenereKey();
+    vigenereKey.value = key;
+    updateVigenereKeyExpansion(key, vigenereInput.value);
 }); 
